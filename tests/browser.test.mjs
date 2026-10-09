@@ -35,7 +35,7 @@ test('rose glass controls preserve readable fallbacks and reduced motion', async
   assert.ok(await page.locator('.hdr').evaluate(el =>
     getComputedStyle(el).backdropFilter.includes('blur')));
   assert.equal(await page.locator('.hdr').evaluate(el =>
-    getComputedStyle(el).backgroundColor), 'rgba(248, 244, 238, 0.72)');
+    getComputedStyle(el).backgroundColor), 'rgba(248, 244, 238, 0.38)');
   const session = await page.context().newCDPSession(page);
   await session.send('Emulation.setEmulatedMedia', { features: [
     { name: 'prefers-reduced-transparency', value: 'reduce' },
@@ -50,6 +50,28 @@ test('rose glass controls preserve readable fallbacks and reduced motion', async
     assert.equal(fallback.filter, 'none');
   }
   await page.close();
+});
+
+test('mobile glass header and booking dock float inside viewport edges', async () => {
+  for (const width of [320, 390, 820]) {
+    const page = await newPage({ viewport: { width, height: 740 }, reducedMotion: 'reduce' });
+    await navigate(page, 'home');
+    await page.evaluate(() => scrollTo(0, 400));
+    for (const selector of ['.hdr', '.actionbar']) {
+      const bounds = await page.locator(selector).boundingBox();
+      assert.ok(bounds.x >= 12 && bounds.x + bounds.width <= width - 12);
+      assert.ok(bounds.y >= 12 && bounds.y + bounds.height <= 728);
+      assert.ok(await page.locator(selector).evaluate(el =>
+        parseFloat(getComputedStyle(el).borderRadius) >= 24));
+    }
+    await page.locator('#menuBtn').click();
+    assert.equal(await page.locator('.actionbar').isVisible(), false);
+    const menu = await page.locator('#mmenu').boundingBox();
+    assert.ok(menu.y >= 100 && menu.y + menu.height <= 728);
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('.actionbar').isVisible(), true);
+    await page.close();
+  }
 });
 
 test('new glossy logo renders in header and footer without cropping or crowding navigation', async () => {
