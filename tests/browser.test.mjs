@@ -17,6 +17,37 @@ after(async () => {
 });
 
 const pages = ['home', 'prijslijst', 'producten', 'over', 'contact'];
+test('rose glass controls preserve readable fallbacks and reduced motion', async () => {
+  const page = await newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  await navigate(page, 'home');
+  const style = await page.locator('.hero .btn-pink').evaluate(el => ({
+    background: getComputedStyle(el).backgroundColor,
+    color: getComputedStyle(el).color,
+    radius: getComputedStyle(el).borderRadius,
+    transition: getComputedStyle(el).transitionDuration
+  }));
+  assert.equal(style.background, 'rgb(173, 45, 103)');
+  assert.equal(style.color, 'rgb(255, 255, 255)');
+  assert.equal(style.radius, '999px');
+  assert.equal(style.transition, '0s');
+  assert.ok(await page.locator('.hdr').evaluate(el =>
+    getComputedStyle(el).backdropFilter.includes('blur')));
+  const session = await page.context().newCDPSession(page);
+  await session.send('Emulation.setEmulatedMedia', { features: [
+    { name: 'prefers-reduced-transparency', value: 'reduce' },
+    { name: 'prefers-reduced-motion', value: 'reduce' }
+  ] });
+  for (const selector of ['.hdr', '.actionbar', '.mmenu']) {
+    const fallback = await page.locator(selector).evaluate(el => ({
+      background: getComputedStyle(el).backgroundColor,
+      filter: getComputedStyle(el).backdropFilter
+    }));
+    assert.equal(fallback.background, 'rgb(252, 249, 250)');
+    assert.equal(fallback.filter, 'none');
+  }
+  await page.close();
+});
+
 test('new glossy logo renders in header and footer without cropping or crowding navigation', async () => {
   for (const width of [320, 390, 820, 1180, 1440]) {
     const page = await newPage({ viewport: { width, height: 900 }, reducedMotion: 'reduce' });

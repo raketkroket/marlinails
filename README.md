@@ -1,7 +1,10 @@
 # Marli Nails
 
-The current design uses warm beige, muted rose and brown, with an immersive
-photographic hero. Dutch content, the five existing hash-routed pages, salon
+The current design keeps its warm editorial canvas and photographic hero, with
+restrained pink accents, rounded controls and frosted navigation surfaces.
+Glass effects use opaque fallbacks and respect reduced-transparency preferences;
+existing motion respects reduced-motion preferences.
+Dutch content, the five existing hash-routed pages, salon
 photography and appointment-by-phone/email flow are preserved.
 
 Mobile and tablet layouts below 860px use readable 16-17px interface/body text,
