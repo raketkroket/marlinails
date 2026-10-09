@@ -19,7 +19,7 @@ const CONTENT={
     hero:photo('20260617_215744',"Roze nagels met verfijnde bloemen nail art, gemaakt bij Marli Nails","Roze nagels",'100vw'),
     heroSmall:photo('20260313_163813',"Plumkleurige en zachtroze nagels met een handgeschilderd takje","Nail art",'(min-width:1024px) 240px, 40vw'),
     salon:{srcs:[WP+"20211010_124909.jpg"],alt:"Voorbeelden van verfijnde nail art bij Marli Nails",ratio:"4:5",label:"Nail art uit de salon"},
-    about:{srcs:[WP+"20211113_122901.jpg"],alt:"Marli Nails",ratio:"4:5",label:"Over Marli Nails"}
+    about:{srcs:[WP+"20211113_122901.jpg"],alt:"Marjon van Rossum, eigenaresse van Marli Nails",ratio:"4:5",label:"Over Marli Nails"}
   },
   services:[
     {name:"Manicure",text:"Verwen uw handen met een verzorgende manicurebehandeling.",from:"Vanaf € 35",to:"manicure",img:{srcs:[WP+"20211111_160925-500x500.jpg"],alt:"Manicure bij Marli Nails",ratio:"1:1",label:"Manicure"}},

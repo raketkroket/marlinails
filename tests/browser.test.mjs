@@ -98,6 +98,40 @@ test('new glossy logo renders in header and footer without cropping or crowding 
   }
 });
 
+test('client preview keeps desktop text readable and photo details uncropped', async () => {
+  const page = await newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+  await navigate(page, 'home');
+  for (const [selector, minimum] of [
+    ['.nav a', 15], ['.hero-text', 17], ['.welkom-copy p:not(.lead)', 17],
+    ['.card p', 17], ['.btn', 16]
+  ]) {
+    assert.ok(await page.locator(selector).first().evaluate(el =>
+      parseFloat(getComputedStyle(el).fontSize)) >= minimum, selector);
+  }
+  await page.locator('.gal button').first().click();
+  assert.equal(await page.locator('#lbImg img').evaluate(el =>
+    getComputedStyle(el).objectFit), 'contain');
+  const dialog = await page.locator('#lb').boundingBox();
+  assert.ok(dialog.y >= 0 && dialog.y + dialog.height <= 900);
+  await page.locator('#lbClose').click();
+  await navigate(page, 'over');
+  assert.ok(await page.locator('.ab-grid .lead').evaluate(el =>
+    parseFloat(getComputedStyle(el).fontSize)) >= 22);
+  await page.close();
+});
+
+test('mobile contact fields get space without the floating dock covering them', async () => {
+  const page = await newPage({ viewport: { width: 390, height: 500 }, reducedMotion: 'reduce' });
+  await navigate(page, 'contact');
+  for (const selector of ['#f-name', '#f-mail', '#f-tel', '#f-msg']) {
+    await page.locator(selector).focus();
+    assert.equal(await page.locator('.actionbar').isVisible(), false);
+  }
+  await page.locator('.cform button').focus();
+  assert.equal(await page.locator('.actionbar').isVisible(), true);
+  await page.close();
+});
+
 async function newPage(options = {}) {
   return (await browser.newContext(options)).newPage();
 }
@@ -109,7 +143,9 @@ async function navigate(page, name) {
 }
 
 for (const [label, width, height] of [
-  ['desktop', 1440, 1000], ['small desktop', 1100, 900], ['tablet', 820, 1180], ['mobile', 390, 844],
+  ['desktop', 1440, 1000], ['desktop navigation boundary', 1180, 900],
+  ['small desktop', 1100, 900], ['tablet layout boundary', 860, 900],
+  ['tablet', 820, 1180], ['mobile', 390, 844],
   ['small mobile', 320, 740], ['200% desktop zoom equivalent', 720, 500]
 ]) {
   test(`${label}: all pages reflow and pass automated WCAG AA checks`, async () => {

@@ -8,6 +8,8 @@ existing motion respects reduced-motion preferences.
 On mobile, the header and booking dock float within safe-area-aware margins.
 The transparent header shell uses backed controls to keep navigation readable
 over photography; the dock hides while the keyboard-accessible menu is open.
+It also hides while a contact field is focused, leaving space for the mobile
+keyboard. Desktop controls and body copy retain readable 15-17px sizing.
 Dutch content, the five existing hash-routed pages, salon
 photography and appointment-by-phone/email flow are preserved.
 
