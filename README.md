@@ -86,6 +86,9 @@ Prices and Seduction product details were checked against
 The published treatment prices are effective from 1 September 2025.
 “Pedicure” is explicitly described as cosmetic teennail care, not medical foot care.
 Original salon images come from the business website and the eight supplied 2026 photos.
+The supplied glossy pink logo replaces the text branding in the header and footer.
+`npm run images` also generates its transparent 480px PNG web copy at
+`public/assets/marli-logo-glossy.png`, preserving the full-sized original.
 The hero and gallery use separate photos, with no repeated homepage photographs.
 Keep permission for their use.
 No unrelated stock photography is used.

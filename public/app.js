@@ -14,7 +14,7 @@ const CONTENT={
   business:{name:"Marli Nails",owner:"Marjon van Rossum",phone:"06 22889353",phoneIntl:"+31622889353",email:"info@marlinails.nl",street:"Sonatestraat 6",postcode:"1312 EH",city:"Almere"},
   nav:[["Home","#/"],["Prijslijst","#/prijslijst"],["Producten Seduction","#/producten"],["Over Marli Nails","#/over"],["Contact","#/contact"]],
   hours:[["Woensdag","10:00–18:00"],["Donderdag","10:00–18:00"],["Vrijdag","10:00–18:00"],["Zaterdag","10:00–18:00"]],
-  logo:{srcs:[WP+"logo.png"],alt:"Marli Nails"},
+  logo:{srcs:[WP+"marli-logo-glossy.png"],alt:"Marli Nails"},
   images:{
     hero:photo('20260617_215744',"Roze nagels met verfijnde bloemen nail art, gemaakt bij Marli Nails","Roze nagels",'100vw'),
     heroSmall:photo('20260313_163813',"Plumkleurige en zachtroze nagels met een handgeschilderd takje","Nail art",'(min-width:1024px) 240px, 40vw'),

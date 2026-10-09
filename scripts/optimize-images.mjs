@@ -3,6 +3,10 @@ import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
 
 const publicDir = new URL('../public/', import.meta.url);
+await sharp(fileURLToPath(new URL('Glossy Pink Marli Nails Logo.png', publicDir)))
+  .resize({ width: 480, withoutEnlargement: true })
+  .png({ compressionLevel: 9 })
+  .toFile(fileURLToPath(new URL('assets/marli-logo-glossy.png', publicDir)));
 const sources = (await readdir(publicDir)).filter(name => /^2026\d{4}_\d{6}\.jpg$/.test(name));
 if (!sources.length) throw new Error('No supplied 2026 salon photographs found.');
 for (const name of sources) {

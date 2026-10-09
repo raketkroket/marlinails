@@ -3,8 +3,10 @@
 body{font-size:16px}
 .hdr{background:var(--white);border-bottom:1px solid var(--line)}
 .hdr-in{height:96px}
-.wordmark{font:400 43px/.9 var(--serif);letter-spacing:-2px;color:var(--plum)}
-.wordmark>span{display:block;margin-top:10px;font:500 9px/1.3 var(--sans);letter-spacing:3px}
+.hdr .logo{flex:none}
+.hdr .logo img{width:140px;max-height:76px;object-fit:contain}
+.footer-brand img{width:180px;height:auto;object-fit:contain}
+@media(max-width:1179px){.hdr .logo img{width:120px;max-height:64px}}
 .nav a{font-size:13px;padding:0 11px}
 .nav a::after{height:1px}
 .hdr-tel{font-size:13px;font-weight:400}

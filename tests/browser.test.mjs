@@ -17,6 +17,30 @@ after(async () => {
 });
 
 const pages = ['home', 'prijslijst', 'producten', 'over', 'contact'];
+test('new glossy logo renders in header and footer without cropping or crowding navigation', async () => {
+  for (const width of [320, 390, 820, 1180, 1440]) {
+    const page = await newPage({ viewport: { width, height: 900 }, reducedMotion: 'reduce' });
+    await page.goto(`${origin}/#/`);
+    for (const selector of ['.hdr [data-logo]', '.ftr [data-logo]']) {
+      const image = page.locator(selector);
+      await image.evaluate(image => image.decode());
+      assert.equal(await image.getAttribute('src'), '/assets/marli-logo-glossy.png');
+      assert.equal(await image.getAttribute('alt'), 'Marli Nails');
+      const size = await image.boundingBox();
+      assert.ok(size.width >= 120 && size.height >= 44, 'Logo remains clearly visible');
+      assert.ok(Math.abs(size.width / size.height - 480 / 257) < .02, 'Logo keeps its proportions');
+    }
+    const logo = await page.locator('.hdr .logo').boundingBox();
+    const actions = await page.locator('.hdr-act').boundingBox();
+    assert.ok(logo.x + logo.width < actions.x, 'Logo does not collide with header actions');
+    assert.ok(await page.locator('.hdr .logo').evaluate(el => el.scrollWidth <= el.clientWidth));
+    assert.equal(await page.locator('.hdr').evaluate(el => el.scrollWidth <= el.clientWidth), true);
+    await page.locator('.hdr .logo').click();
+    assert.equal(await page.locator('[data-view="home"].on').count(), 1);
+    await page.close();
+  }
+});
+
 async function newPage(options = {}) {
   return (await browser.newContext(options)).newPage();
 }
