@@ -30,10 +30,12 @@ test('rose glass controls preserve readable fallbacks and reduced motion', async
   assert.equal(style.color, 'rgb(255, 255, 255)');
   assert.equal(style.radius, '999px');
   assert.equal(style.transition, '0s');
+  assert.equal(await page.locator('.book').evaluate(el =>
+    getComputedStyle(el).backgroundColor), 'rgb(222, 208, 194)');
   assert.ok(await page.locator('.hdr').evaluate(el =>
     getComputedStyle(el).backdropFilter.includes('blur')));
   assert.equal(await page.locator('.hdr').evaluate(el =>
-    getComputedStyle(el).backgroundColor), 'rgba(252, 249, 250, 0.82)');
+    getComputedStyle(el).backgroundColor), 'rgba(248, 244, 238, 0.82)');
   const session = await page.context().newCDPSession(page);
   await session.send('Emulation.setEmulatedMedia', { features: [
     { name: 'prefers-reduced-transparency', value: 'reduce' },
@@ -44,7 +46,7 @@ test('rose glass controls preserve readable fallbacks and reduced motion', async
       background: getComputedStyle(el).backgroundColor,
       filter: getComputedStyle(el).backdropFilter
     }));
-    assert.equal(fallback.background, 'rgb(252, 249, 250)');
+    assert.equal(fallback.background, 'rgb(248, 244, 238)');
     assert.equal(fallback.filter, 'none');
   }
   await page.close();

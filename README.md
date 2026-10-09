@@ -1,7 +1,8 @@
 # Marli Nails
 
 The current design keeps its warm editorial canvas and photographic hero, with
-restrained pink accents, rounded controls and frosted navigation surfaces.
+cream, beige and soft brown surfaces, restrained pink appointment accents,
+rounded controls and frosted navigation surfaces.
 Glass effects use opaque fallbacks and respect reduced-transparency preferences;
 existing motion respects reduced-motion preferences.
 Dutch content, the five existing hash-routed pages, salon
