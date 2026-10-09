@@ -129,9 +129,9 @@ $('#pmain').innerHTML=C.prices.map(g=>{
   const rows=g.rows.map(([n,d,k,m])=>{
     let pr;
     const amount=value=>value==='gratis'?'Gratis':`€ ${esc(value)}`;
-    if(g.single) pr=`<td>${amount(k)}</td>`;
-    else if(m===null) pr=`<td colspan="2"><span class="sr">Kort en medium: </span>${amount(k)}</td>`;
-    else pr=`<td>${amount(k)}</td><td>${amount(m)}</td>`;
+    if(g.single) pr=`<td data-label="Prijs">${amount(k)}</td>`;
+    else if(m===null) pr=`<td colspan="2" data-label="Kort en medium"><span class="sr">Kort en medium: </span>${amount(k)}</td>`;
+    else pr=`<td data-label="Kort">${amount(k)}</td><td data-label="Medium">${amount(m)}</td>`;
     return `<tr><th scope="row">${esc(n)}${d?`<span class="ds">${esc(d)}</span>`:''}</th>${pr}</tr>`;
   }).join('');
   return `<section class="pg" id="${g.id}" aria-labelledby="pg-${g.id}"><div class="pg-head"><h2 id="pg-${g.id}">${esc(g.title)}</h2>${g.intro?`<p>${esc(g.intro)}</p>`:''}</div><table class="price-table"><caption class="sr">${esc(g.title)}, prijzen in euro's</caption><thead><tr><th scope="col">Behandeling</th>${cols}</tr></thead><tbody>${rows}</tbody></table></section>`;
@@ -179,7 +179,7 @@ const mbtn=$('#menuBtn'),mm=$('#mmenu');
 function setMenu(open){
   body.classList.toggle('menu-open',open);mbtn.setAttribute('aria-expanded',open);
   $('#menuLbl').textContent=open?'Sluiten':'Menu';mm.setAttribute('aria-hidden',!open);mm.inert=!open;
-  $$('#main,.ftr,.actionbar,.hdr .logo,.hdr-book').forEach(el=>el.inert=open);
+  $$('#main,.ftr,.actionbar,.hdr .logo,.hdr-book,.hdr-tel').forEach(el=>el.inert=open);
   if(open) mm.querySelector('a').focus();
 }
 mm.inert=true;

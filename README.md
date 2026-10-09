@@ -4,6 +4,12 @@ The current design uses warm beige, muted rose and brown, with an immersive
 photographic hero. Dutch content, the five existing hash-routed pages, salon
 photography and appointment-by-phone/email flow are preserved.
 
+Mobile and tablet layouts below 860px use readable 16-17px interface/body text,
+single-column story, treatment and booking sections, and a wrapping price index.
+Below 480px, pricing tables retain their headers and associations but visually
+stack treatments with explicit Kort/Medium/Prijs labels. The mobile photo dialog,
+contact form and footer fit small screens without hiding horizontal overflow.
+
 ## Local development
 
 Use Node.js 24 or newer (Node 24 LTS recommended).

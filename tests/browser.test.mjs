@@ -84,7 +84,7 @@ for (const [label, width, height] of [
 }
 
 test('original images and fonts load locally, with no third-party requests', async () => {
-  const page = await newPage();
+  const page = await newPage({ reducedMotion: 'reduce' });
   const external = [];
   page.on('request', request => { if (!request.url().startsWith(origin)) external.push(request.url()); });
   await navigate(page, 'home');
@@ -98,7 +98,7 @@ test('original images and fonts load locally, with no third-party requests', asy
     if (resolution.responsive) assert.match(resolution.source, /-(640|1440)\.webp$/);
     else assert.ok(resolution.width >= 500);
   }
-  assert.equal(await page.locator('.gal button').count(), 6);
+  assert.equal(await page.locator('.gal button').count(), 4);
   const sources = await page.locator('.view.on img').evaluateAll(images => images.map(image => image.src));
   assert.equal(new Set(sources).size, sources.length, 'Homepage photographs must not repeat');
   assert.equal(await page.evaluate(() => document.fonts.check('18px "DM Sans"')), true);
@@ -132,6 +132,51 @@ test('mobile menu traps focus, closes on Escape and same-page selection', async 
   await page.locator('#mnav a[href="#/contact"]').click();
   await page.locator('[data-view="contact"].on').waitFor();
   assert.equal(await page.evaluate(() => document.activeElement.tagName), 'H1');
+  await page.close();
+});
+
+test('mobile sections use full-width layouts and pricing keeps explicit size labels', async () => {
+  for (const width of [320, 390, 720, 820]) {
+    const page = await newPage({ viewport: { width, height: 844 }, reducedMotion: 'reduce' });
+    await navigate(page, 'home');
+    for (const [section, content] of [
+      ['.welkom-grid', '.welkom-copy'], ['.treat-layout', '.cards'], ['.book-grid', '.book-intro']
+    ]) {
+      const parent = await page.locator(section).evaluate(el => el.clientWidth -
+        parseFloat(getComputedStyle(el).paddingLeft) - parseFloat(getComputedStyle(el).paddingRight));
+      const child = await page.locator(content).boundingBox();
+      assert.ok(child.width >= parent * .95, `${width}: ${content} must not inherit narrow desktop columns`);
+    }
+    assert.equal(await page.locator('.hero-text').evaluate(el => parseFloat(getComputedStyle(el).fontSize)), 17);
+    await navigate(page, 'prijslijst');
+    assert.equal(await page.locator('#natuurlijk tbody tr').first().locator('td[data-label="Kort"]').count(), 1);
+    assert.equal(await page.locator('#natuurlijk tbody tr').first().locator('td[data-label="Medium"]').count(), 1);
+    for (const cell of await page.locator('.price-table td').all()) {
+      assert.ok(await cell.getAttribute('data-label'), 'Each amount has a mobile size/price label');
+    }
+    await page.close();
+  }
+});
+
+test('small mobile menu and photo dialog remain usable in a short viewport', async () => {
+  const page = await newPage({ viewport: { width: 320, height: 500 }, reducedMotion: 'reduce' });
+  await navigate(page, 'home');
+  await page.locator('#menuBtn').click();
+  await page.locator('.mm-info [data-mail]').focus();
+  await page.locator('.mm-info [data-mail]').scrollIntoViewIfNeeded();
+  const email = await page.locator('.mm-info [data-mail]').boundingBox();
+  assert.ok(email.y >= 80 && email.y + email.height <= 500);
+  await page.keyboard.press('Escape');
+  await page.locator('.gal button').first().click();
+  await page.locator('#lbImg img').evaluate(image => image.decode());
+  const dialog = await page.locator('#lb').boundingBox();
+  assert.ok(dialog.y >= 0 && dialog.y + dialog.height <= 500);
+  for (const control of await page.locator('.lb-ctrl button').all()) {
+    const bounds = await control.boundingBox();
+    assert.ok(bounds.width >= 44 && bounds.height >= 44);
+  }
+  await page.locator('#lbClose').click();
+  assert.equal(await page.locator('#lb').evaluate(el => el.open), false);
   await page.close();
 });
 
@@ -187,7 +232,7 @@ test('gallery is keyboard accessible and reduced motion leaves content visible',
   await page.keyboard.press('Enter');
   assert.equal(await page.locator('#lb').evaluate(el => el.open), true);
   await page.keyboard.press('ArrowRight');
-  assert.match(await page.locator('#lbCap').innerText(), /2 van 6/);
+  assert.match(await page.locator('#lbCap').innerText(), /2 van 4/);
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#lb').evaluate(el => el.open), false);
   assert.equal(await page.locator('.reveal').first().evaluate(el => getComputedStyle(el).opacity), '1');
