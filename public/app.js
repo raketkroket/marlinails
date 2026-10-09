@@ -16,14 +16,14 @@ const CONTENT={
   hours:[["Woensdag","10:00–18:00"],["Donderdag","10:00–18:00"],["Vrijdag","10:00–18:00"],["Zaterdag","10:00–18:00"]],
   logo:{srcs:[WP+"logo.png"],alt:"Marli Nails"},
   images:{
-    hero:photo('20260617_215744',"Roze nagels met verfijnde bloemen nail art, gemaakt bij Marli Nails","Roze nagels",'(min-width:1024px) 700px, 100vw'),
+    hero:photo('20260617_215744',"Roze nagels met verfijnde bloemen nail art, gemaakt bij Marli Nails","Roze nagels",'100vw'),
     heroSmall:photo('20260313_163813',"Plumkleurige en zachtroze nagels met een handgeschilderd takje","Nail art",'(min-width:1024px) 240px, 40vw'),
     salon:{srcs:[WP+"20211010_124909.jpg"],alt:"Voorbeelden van verfijnde nail art bij Marli Nails",ratio:"4:5",label:"Nail art uit de salon"},
     about:{srcs:[WP+"20211113_122901.jpg"],alt:"Marli Nails",ratio:"4:5",label:"Over Marli Nails"}
   },
   services:[
     {name:"Manicure",text:"Verwen uw handen met een verzorgende manicurebehandeling.",from:"Vanaf € 35",to:"manicure",img:{srcs:[WP+"20211111_160925-500x500.jpg"],alt:"Manicure bij Marli Nails",ratio:"1:1",label:"Manicure"}},
-    {name:"Pedicure",text:"Geniet van mooi verzorgde voeten en gelakte teennagels. Cosmetische teennagelverzorging, geen medische pedicure.",from:"Vanaf € 35",to:"teennagels",img:{srcs:["/pedicure%20marli.jpg"],alt:"Gelakte teennagels bij Marli Nails",ratio:"1:1",label:"Teennagels"}},
+    {name:"Teennagels",text:"Geniet van mooi verzorgde voeten en gelakte teennagels. Cosmetische teennagelverzorging, geen medische pedicure.",from:"Vanaf € 35",to:"teennagels",img:{srcs:["/pedicure%20marli.jpg"],alt:"Gelakte teennagels bij Marli Nails",ratio:"1:1",label:"Teennagels"}},
     {name:"Nagelbehandelingen",text:"Laat uw nagels verzorgen en omtoveren tot prachtige blikvangers.",from:"Vanaf € 50",to:"natuurlijk",img:photo('20260327_122338',"Natuurlijke nagels met witte en blauwe french tips","Nagelbehandelingen",'180px')},
     {name:"Nail Art",text:"Geef uw nagels een persoonlijke uitstraling met creatieve nail art.",from:"Vanaf € 3 per nagel",to:"afwerking",img:photo('20260318_214033',"Lila nagels met handgeschilderde bloesem","Nail art",'180px')}
   ],
@@ -91,7 +91,7 @@ function fill(el,img,{ratio=true}={}){
   if(ratio&&img.ratio){const[w,h]=img.ratio.split(':').map(Number);el.style.aspectRatio=`${w}/${h}`;}
   const list=[...(img.srcs||[])];
   if(!list.length){placeholder(el,img.label||img.caption);return}
-  const im=new Image();im.alt=img.alt||'';im.decoding='async';im.loading=el.classList.contains('hero-main')?'eager':'lazy';if(el.classList.contains('hero-main')) im.fetchPriority='high';
+  const im=new Image();im.alt=img.alt||'';im.decoding='async';im.loading=el.classList.contains('hero-backdrop')?'eager':'lazy';if(el.classList.contains('hero-backdrop')) im.fetchPriority='high';
   if(img.srcset){im.srcset=img.srcset;im.sizes=img.sizes}
   let i=0;
   im.onerror=()=>{i++; if(i<list.length) im.src=list[i]; else placeholder(el,img.label||img.caption)};
@@ -239,3 +239,10 @@ $('#cform').addEventListener('submit',e=>{
 /* Start */
 if(!location.hash.startsWith('#/')) history.replaceState(null,'','#/');
 go(true);
+// Scroll within the homepage without changing its hash route.
+$('[data-scroll-welcome]').addEventListener('click',event=>{
+  event.preventDefault();
+  $('#h-welkom').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+  $('#h-welkom').setAttribute('tabindex','-1');
+  $('#h-welkom').focus({preventScroll:true});
+});

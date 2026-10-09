@@ -16,6 +16,7 @@
 </script>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/editorial.css">
 </head>
 <body>
 
@@ -30,7 +31,7 @@
 
 <header class="hdr" id="hdr">
   <div class="wrap hdr-in">
-    <a class="logo" href="#/" aria-label="Marli Nails, naar de homepage"><img data-logo alt="Marli Nails" width="224" height="136"></a>
+    <a class="logo" href="#/" aria-label="Marli Nails, naar de homepage"><span class="wordmark">Marli<span>NAILS · ALMERE</span></span></a>
     <nav class="nav" aria-label="Hoofdmenu"><ul id="nav"></ul></nav>
     <div class="hdr-act">
       <a class="hdr-tel" data-tel-href><svg class="ico" aria-hidden="true"><use href="#i-tel"/></svg><span><span class="sr">Bel </span><span data-tel-text></span></span></a>
@@ -61,32 +62,16 @@
 <!-- =============================== HOME =============================== -->
 <div class="view" data-view="home" data-title="Nagelsalon Almere | Marli Nails">
   <section class="hero" aria-labelledby="h-home">
-    <div class="wrap hero-grid">
-      <div class="hero-eyebrow">
-        <span class="kicker">Marli Nails · Nagelsalon in Almere</span>
-        <span class="hero-location">Persoonlijk. Verzorgd. Helemaal u.</span>
+    <div class="hero-backdrop ph" data-img="hero"></div>
+    <div class="wrap luxury-hero">
+      <div class="hero-eyebrow"><span class="kicker">Een persoonlijk moment · Almere</span><span class="hero-location">Nail care & art</span></div>
+      <div class="hero-content">
+        <p class="hero-prelude">Met aandacht gemaakt.</p>
+        <h1 id="h-home" tabindex="-1">Mooi verzorgde<br>nagels. <em>Helemaal u.</em></h1>
+        <p class="hero-text">Even tijd voor uzelf. Persoonlijke nagelverzorging in de rustige salon aan huis van Marjon van Rossum.</p>
+        <div class="hero-ctas"><a class="btn btn-pink" href="#/contact">Plan uw moment<span class="btn-arrow" aria-hidden="true">↗</span></a><a class="tlink" href="#/prijslijst">Ontdek de behandelingen<span aria-hidden="true">↗</span></a></div>
       </div>
-      <h1 id="h-home" tabindex="-1"><span class="hero-title-top">Mooi verzorgde</span> <span class="hero-title-bottom">nagels.</span></h1>
-      <div class="hero-copy">
-        <p class="hero-promise">Even tijd <em>voor jezelf.</em></p>
-        <p class="hero-text">Welkom bij Marli Nails, jouw nagelsalon in Almere. Geniet van persoonlijke aandacht, professionele nagelverzorging en een heerlijk verwenmoment.</p>
-        <div class="hero-ctas">
-          <a class="btn btn-pink" href="#/contact">Maak een afspraak<span class="btn-arrow" aria-hidden="true">↗</span></a>
-          <a class="tlink" href="#/prijslijst">Bekijk de behandelingen<span aria-hidden="true">↗</span></a>
-        </div>
-        <div class="hero-contact">
-          <a data-tel-href><svg class="ico" aria-hidden="true"><use href="#i-tel"/></svg>Bel direct: <span data-tel-text></span></a>
-          <span>Uitsluitend op afspraak</span>
-        </div>
-      </div>
-      <figure class="hero-vis">
-        <div class="ph hero-main reveal" data-img="hero"></div>
-        <figcaption><span>Nagels met een persoonlijk accent</span><span class="photo-index" aria-hidden="true">01 / Marli Nails</span></figcaption>
-      </figure>
-      <figure class="hero-detail">
-        <div class="ph hero-small reveal" data-img="heroSmall"></div>
-        <figcaption>Het verschil<br>zit in de details.</figcaption>
-      </figure>
+      <div class="hero-bottom"><span>Persoonlijke aandacht.<br>Tot in het kleinste detail.</span><a href="#h-welkom" data-scroll-welcome class="hero-scroll">Ontdek Marli <span aria-hidden="true">↓</span></a><span>Woensdag — zaterdag<br>Uitsluitend op afspraak</span></div>
     </div>
   </section>
 
