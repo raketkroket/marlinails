@@ -18,7 +18,8 @@ const types = {
 
 export async function securityHeaders({ https = false } = {}) {
   const html = await readFile(path.join(publicRoot, 'index.html'), 'utf8');
-  const structuredData = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
+  // HTML parsing normalizes CRLF/CR to LF before CSP checks inline scripts.
+  const structuredData = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1].replace(/\r\n?/g, '\n');
   const hash = createHash('sha256').update(structuredData).digest('base64');
   return {
     'Content-Security-Policy': `default-src 'none'; script-src 'self' 'sha256-${hash}'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`,

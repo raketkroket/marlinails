@@ -53,7 +53,10 @@ is enabled. No environment variables or backend are needed.
 Vercel does not use the generated `_headers` file. `vercel.json` explicitly applies
 the production security headers instead; the build fails if they differ from the
 Node server's headers, including the structured-data CSP hash. After editing
-metadata, update that hash in `vercel.json`. The stylesheet/script URLs carry a
+metadata, update that hash in `vercel.json`. Hashing normalizes HTML line endings
+to LF, matching browser parsing and Linux/Windows checkouts. HTML is checked in
+with LF line endings, and tests build both checkout formats.
+The stylesheet/script URLs carry a
 release version, and response caching requires revalidation to avoid mixed old
 and new assets. Update the release version when changing these assets.
 

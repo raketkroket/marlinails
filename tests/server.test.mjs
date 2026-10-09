@@ -1,7 +1,12 @@
 import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { readFile, readdir, stat } from 'node:fs/promises';
+import { readFile, readdir, stat, mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { promisify } from 'node:util';
 import sharp from 'sharp';
 import { createSiteServer, securityHeaders } from '../server.mjs';
 
@@ -97,6 +102,30 @@ test('Vercel builds only dist and applies current production security headers', 
   }
   for (const asset of ['/styles.css?version=deployment', '/editorial.css?version=deployment', '/app.js?version=deployment']) {
     assert.equal((await request(asset)).status, 200, asset);
+  }
+});
+
+test('production build and browser CSP hashes agree for Linux and Windows line endings', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'marli-vercel-'));
+  try {
+    for (const [name, newline] of [['linux', '\n'], ['windows', '\r\n']]) {
+      const root = path.join(directory, name);
+      await mkdir(path.join(root, 'public'), { recursive: true });
+      await mkdir(path.join(root, 'scripts'), { recursive: true });
+      for (const file of ['server.mjs', 'vercel.json', 'scripts/build.mjs', 'public/index.html']) {
+        const content = await readFile(new URL(`../${file}`, import.meta.url), 'utf8');
+        await writeFile(path.join(root, file), content.replace(/\r\n?/g, '\n').replace(/\n/g, newline));
+      }
+      await promisify(execFile)(process.execPath, [path.join(root, 'scripts', 'build.mjs')], { cwd: root });
+      const html = await readFile(path.join(root, 'dist', 'index.html'), 'utf8');
+      const script = html.replace(/\r\n?/g, '\n').match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
+      const browserHash = createHash('sha256').update(script).digest('base64');
+      const headers = await readFile(path.join(root, 'dist', '_headers'), 'utf8');
+      assert.ok(headers.includes(`'sha256-${browserHash}'`), `${name}: browser-parsed script matches CSP`);
+      assert.ok((await securityHeaders({ https: true }))['Content-Security-Policy'].includes(`'sha256-${browserHash}'`));
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true });
   }
 });
 
