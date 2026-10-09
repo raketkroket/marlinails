@@ -55,6 +55,7 @@ body{font-size:16px}
 
 .book-cols h3{color:var(--plum)}
 .ftr ul a,.ftr-base,.ftr-base a,.ftr-note{color:#f6eee5}
+.ftr address .ico{color:#e6cfc0}
 .ftr :focus-visible{outline-color:#f6eee5}
 @media (max-width:859px){
   :root{--pad:clamp(20px,4vw,32px);--sec:64px}
