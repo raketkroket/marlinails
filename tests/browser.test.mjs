@@ -35,7 +35,7 @@ test('rose glass controls preserve readable fallbacks and reduced motion', async
   assert.ok(await page.locator('.hdr').evaluate(el =>
     getComputedStyle(el).backdropFilter.includes('blur')));
   assert.equal(await page.locator('.hdr').evaluate(el =>
-    getComputedStyle(el).backgroundColor), 'rgba(248, 244, 238, 0.82)');
+    getComputedStyle(el).backgroundColor), 'rgba(248, 244, 238, 0.72)');
   const session = await page.context().newCDPSession(page);
   await session.send('Emulation.setEmulatedMedia', { features: [
     { name: 'prefers-reduced-transparency', value: 'reduce' },

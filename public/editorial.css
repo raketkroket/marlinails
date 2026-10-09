@@ -248,7 +248,7 @@ body{font-size:16px}
 
 @supports ((backdrop-filter:blur(16px)) or (-webkit-backdrop-filter:blur(16px))){
   .hdr,.actionbar{background:rgba(248,244,238,.92);backdrop-filter:blur(16px) saturate(125%);-webkit-backdrop-filter:blur(16px) saturate(125%)}
-  .hdr{background:rgba(248,244,238,.82)}
+  .hdr{background:rgba(248,244,238,.72)}
   .mmenu{background:rgba(248,244,238,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 }
 @media (prefers-reduced-transparency:reduce){
