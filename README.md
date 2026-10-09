@@ -1,8 +1,8 @@
 # Marli Nails
 
-Refinement of the supplied white-and-pink design, not a replacement. Dutch content,
-the five existing hash-routed pages, editorial typography, salon photography and
-appointment-by-phone/email flow are preserved.
+The current design uses warm beige, muted rose and brown, with an immersive
+photographic hero. Dutch content, the five existing hash-routed pages, salon
+photography and appointment-by-phone/email flow are preserved.
 
 ## Local development
 
@@ -36,10 +36,30 @@ keyboard, real-device and 200% browser zoom testing remains important.
 
 - `public/index.html`: existing page layout and business metadata.
 - `public/styles.css`: white/pink design, DM Sans and DM Serif Display, responsive styles.
+- `public/editorial.css`: the current warm editorial theme.
 - `public/app.js`: business content, published prices, navigation and email-draft form.
 - `public/assets/`: original salon images/logo and locally hosted Google Fonts.
 - `server.mjs`: dependency-free, read-only public-file server with security headers.
 - `dist/`: static deployment output produced by `npm run build`.
+
+### Vercel
+
+Import `raketkroket/marlinails`, use the repository root, and set the production
+branch to `main`. The checked-in `vercel.json` selects the Other framework preset,
+runs `npm ci` and `npm run build`, and publishes only `dist`. Use Node.js 24.x.
+Pushing to `main` triggers a production deployment when the Vercel Git integration
+is enabled. No environment variables or backend are needed.
+
+Vercel does not use the generated `_headers` file. `vercel.json` explicitly applies
+the production security headers instead; the build fails if they differ from the
+Node server's headers, including the structured-data CSP hash. After editing
+metadata, update that hash in `vercel.json`. The stylesheet/script URLs carry a
+release version, and response caching requires revalidation to avoid mixed old
+and new assets. Update the release version when changing these assets.
+
+After deployment, check the production URL, all five hash routes, asset loading
+and live security headers. A successful local build or Git push alone is not
+confirmation of a live deployment.
 
 Deploy `dist` on maintained static hosting with enforced HTTPS. `_headers` is
 understood by compatible hosts such as Netlify and Cloudflare Pages; on other

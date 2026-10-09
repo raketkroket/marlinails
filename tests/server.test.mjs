@@ -83,6 +83,23 @@ test('production headers include HSTS but localhost headers do not', async () =>
   assert.equal((await securityHeaders({ https: true }))['Strict-Transport-Security'], 'max-age=31536000');
 });
 
+test('Vercel builds only dist and applies current production security headers', async () => {
+  const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+  assert.equal(config.framework, null);
+  assert.equal(config.buildCommand, 'npm run build');
+  assert.equal(config.outputDirectory, 'dist');
+  assert.equal(config.installCommand, 'npm ci');
+  assert.equal(config.headers[0].source, '/(.*)');
+  const headers = Object.fromEntries(config.headers[0].headers.map(({ key, value }) => [key, value]));
+  assert.equal(headers['Cache-Control'], 'public, max-age=0, must-revalidate');
+  for (const [name, value] of Object.entries(await securityHeaders({ https: true }))) {
+    assert.equal(headers[name], value, name);
+  }
+  for (const asset of ['/styles.css?version=deployment', '/editorial.css?version=deployment', '/app.js?version=deployment']) {
+    assert.equal((await request(asset)).status, 200, asset);
+  }
+});
+
 test('responsive photographs meet resolution and payload budgets with no EXIF metadata', async () => {
   const directory = new URL('../public/assets/', import.meta.url);
   const files = (await readdir(directory)).filter(name => name.endsWith('.webp'));
