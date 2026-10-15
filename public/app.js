@@ -1,120 +1,99 @@
 /* =====================================================================
-   CONTENT — alle teksten, prijzen en foto's op één plek.
-   Bron: www.marlinails.nl (geraadpleegd 9 en 15 oktober 2026) + info van Marjon.
-   Originele salonfoto's zijn lokaal opgeslagen. Bij een laadfout wordt
-   een zichtbare melding getoond en een fout gelogd.
-
-   FOTO VERVANGEN: zet het origineel in public/ (of public/assets/), voeg de
-   naam toe in scripts/optimize-images.mjs, draai `npm run images` en pas
-   hieronder de bestandsnaam, alt-tekst en het bijschrift aan. `focus` bepaalt
-   welk deel van de foto zichtbaar blijft bij het bijsnijden (CSS object-position).
+   MARLI NAILS
+   Teksten, foto's en prijzen staan in public/content/*.json en zijn te
+   bewerken via /admin (Decap CMS) of rechtstreeks in die bestanden.
+   Dit bestand bevat de vaste bedrijfsgegevens, de opbouw van de pagina's
+   en het gedrag. Bron: www.marlinails.nl + info van Marjon (oktober 2026).
    ===================================================================== */
-const WP="/assets/";
-const photo=(name,alt,caption,{sizes='(min-width:1180px) 440px, (min-width:600px) 45vw, 80vw',ratio='4:5',focus='50% 50%'}={})=>({
-  srcs:[WP+name+'-1440.webp'],
-  srcset:`${WP}${name}-640.webp 640w, ${WP}${name}-1440.webp 1440w`,
-  sizes,alt,caption,ratio,focus
-});
-const CONTENT={
+
+/* Vaste gegevens: staan ook in de structured data en metadata in index.html,
+   dus wijzigingen hier ook daar doorvoeren (niet via /admin). */
+const SITE={
   business:{name:"Marli Nails",owner:"Marjon van Rossum",phone:"06 22889353",phoneIntl:"+31622889353",email:"info@marlinails.nl",street:"Sonatestraat 6",postcode:"1312 EH",city:"Almere"},
   nav:[["Home","#/"],["Prijslijst","#/prijslijst"],["Producten Seduction","#/producten"],["Over Marli Nails","#/over"],["Contact","#/contact"]],
   /* Vaste openingstijden. Avondafspraken zijn mogelijk in overleg, maar zijn géén vaste openingstijd. */
   hours:[["Woensdag","10:00–18:00"],["Donderdag","10:00–18:00"],["Vrijdag","10:00–18:00"],["Zaterdag","10:00–18:00"]],
   hoursNote:"Afwijkende tijden zijn in overleg mogelijk, bijvoorbeeld in de avond.",
-  logo:{srcs:[WP+"marli-logo-glossy.png"],alt:"Marli Nails"},
-  images:{
-    hero:photo('20260617_215744',"Roze nagels met verfijnde bloemen nail art, gemaakt bij Marli Nails","Roze nagels",{sizes:'100vw',ratio:null}),
-    /* Profielfoto van Marjon. Vervang deze door haar nieuwste goedgekeurde portret zodra dat is aangeleverd. */
-    about:photo('20211113_122901',"Portret van Marjon van Rossum, eigenaresse en nagelstyliste van Marli Nails","Marjon van Rossum",{sizes:'(min-width:1024px) 520px, (min-width:600px) 420px, 90vw',focus:'50% 30%'})
-  },
-  services:[
-    {name:"Manicure",text:"Verwen uw handen met een verzorgende manicurebehandeling.",prices:"manicure",to:"manicure",img:{srcs:[WP+"20211111_160925-500x500.jpg"],alt:"",ratio:"4:5",label:"Manicure"}},
-    {name:"Teennagels",text:"Mooi verzorgde, gelakte teennagels. Cosmetische teennagelverzorging, geen medische pedicure.",prices:"teennagels",to:"teennagels",img:{srcs:["/pedicure%20marli.jpg"],alt:"",ratio:"4:5",label:"Teennagels"}},
-    {name:"Nagel\u00ADbehandelingen",text:"Laat uw nagels verzorgen en omtoveren tot prachtige blikvangers.",prices:"natuurlijk",to:"natuurlijk",img:photo('20260327_122338',"","Nagelbehandelingen",{sizes:'(min-width:1180px) 300px, (min-width:860px) 45vw, 120px'})},
-    {name:"Nail Art",text:"Geef uw nagels een persoonlijke uitstraling met creatieve nail art.",fixedFrom:"Vanaf €\u00A03 per nagel",to:"afwerking",img:photo('20260318_214033',"","Nail art",{sizes:'(min-width:1180px) 300px, (min-width:860px) 45vw, 120px'})}
-  ],
-  /* Galerij: echte foto's uit de salon, zonder herhaling van de foto's elders op de homepage. */
-  gallery:[
-    photo('20260210_223244',"Blauwe en roze nagels met marmeraccenten","Blauw & roze marmer"),
-    photo('20260313_163813',"Plumkleurige en zachtroze nagels met een handgeschilderd takje","Plum & handgeschilderd takje"),
-    photo('20260108_214645',"Donkerblauwe nagels met een subtiel structuurpatroon","Diepblauw met structuur"),
-    photo('20260723_204906',"Rode nagels met handgeschilderde klaprozen op een witte basis","Rood & klaprozen"),
-    photo('20211111_160344',"Waaier met gelpolishkleuren van Magnetic in de salon","Kleurenwaaier in de salon"),
-    photo('20260521_150616',"Turquoise glanzende nagels met paarse bloemen","Turquoise met bloemen")
-  ],
-  /* =====================================================================
-     PRIJZEN
-     Bedragen in euro's als getal. Kort/medium: [kort, medium]. Eén prijs: getal.
-     `hand:true` = handbehandeling die per PRICE_CHANGE.date met PRICE_CHANGE.increase
-     stijgt (verzoek Marjon: +€ 2,50 voor handbehandelingen per 1 januari 2027).
-     Niet verhoogd: teennagels, Seduction-producten, en — tot Marjon dit bevestigt —
-     nail art, reparaties en het verwijderen van gelpolish. Gratis blijft gratis.
-     ===================================================================== */
-  priceChange:{date:"2027-01-01",label:"1 januari 2027",until:"31 december 2026",increase:2.5},
-  pricesSince:"1 september 2025",
-  prices:[
-    {id:"natuurlijk",title:"Natural nail treatments",intro:"Voor de natuurlijke nagel, met gelpolish of blushes naar keuze.",rows:[
-      {name:"Natural Nail treatment (BIAB)",desc:"Met gelpolish naar keuze",price:[50,52.5],hand:true},
-      {name:"Natural Nail treatment incl. Russian Manicure",desc:"Met blushes naar keuze",price:[60,62.5],hand:true}]},
-    {id:"verlenging",title:"Sets met verlenging",intro:"",rows:[
-      {name:"Nieuwe set met verlenging met gelpolish",desc:"Met behulp van sjablonen of shape-its",price:[65,67.5],hand:true},
-      {name:"Set met verlenging Babyboom",price:[67.5,70],hand:true},
-      {name:"Set met verlenging Reverse French of Inlay",desc:"Afhankelijk van het aantal nagels: 2,50 per nagel",price:[80,82.5],hand:true}]},
-    {id:"afwerking",title:"Seal & Protect en nail art",intro:"",rows:[
-      {name:"Seal & Protect",price:[15,17.5],hand:true},
-      {name:"Nail art",desc:"Per nagel, vanaf",price:3}]},
-    {id:"overig",title:"Reparatie en verwijderen",intro:"",rows:[
-      {name:"Breuk tot 2 nagels",desc:"Reparatie binnen 3 dagen na de behandeling",price:0},
-      {name:"Breuk per nagel",price:[10,12.5]},
-      {name:"Verwijderen gelpolish",desc:"Zonder nabehandeling",price:17.5}]},
-    {id:"manicure",title:"Manicure",intro:"Natuurlijke nagelverzorging.",single:true,rows:[
-      {name:"Brons",desc:"Incl. nagels polijsten, nagelriem treatment en lotion",price:35,hand:true},
-      {name:"Zilver",desc:"Brons plus scrub en handmasker",price:40,hand:true},
-      {name:"Goud",desc:"Zilver plus massage",price:50,hand:true}]},
-    {id:"teennagels",title:"Teennagels",intro:"Cosmetische afwerking van de teennagels.",single:true,rows:[
-      {name:"Teennagels gelpolish",price:35},
-      {name:"Teennagels french manicure",price:37.5}]},
-    {id:"heren",title:"Voor heren",intro:"",single:true,rows:[
-      {name:"E-manicure voor heren",price:27.5,hand:true}]}
-  ],
-  priceNotes:["Marli Nails verzorgt alleen korte nagels en nagels met een medium lengte. (Extreem) lange nagels alleen op aanvraag.","Bij annulering binnen 24 uur voor de afspraak dient 50% van de behandeling betaald te worden."],
-  toeNote:"Marli Nails brengt gelpolish of een french manicure aan op uw teennagels. Dit is een cosmetische behandeling. Marjon is geen pedicure en voert geen medische voetbehandelingen uit.",
-  products:[
-    {title:"Voor de <em>handen</em>",items:[["Liquid Hand Soap","250 ml","19,95"],["Hand Lotion","50 ml","12,95"],["Hand Lotion","250 ml","29,95"],["Hand Rich Cream & Mask","250 ml","32,95"],["Hand Scrub","250 ml","29,95"]]},
-    {title:"Voor de <em>nagelriemen</em>",items:[["Intense Cuticle Cream","10 ml","10,95"],["Intense Cuticle Cream","50 ml","21,95"],["Intense Cuticle Cream","150 ml","49,50"],["Cuticle Oil","15 ml","12,95"]]},
-    {title:"Cadeau en <em>ontspanning</em>",items:[["Bath Bombs","24 stuks","19,95"],["Gift box","Oil, scrub, mask en lotion","69,95"]]}
-  ],
-  timeline:[
-    ["Ruim 30 jaar geleden","Een eerste liefde voor nagels","Ik ontdekte de nagelbranche en vond het een ontzettend leuke hobby. Destijds heb ik er niets mee gedaan, mede door een drukke baan."],
-    ["2020","Het begint weer te kriebelen","In 2020 zat ik door de coronaperiode noodgedwongen drie maanden thuis. In die periode begon mijn interesse in nagelstyling opnieuw te groeien en besloot ik mij verder te verdiepen in het vak. Ik volgde de opleiding tot allround nagelstyliste, aangevuld met vervolgopleidingen en specialistische nagelcertificaten."],
-    ["2021","Examen behaald","Na veel oefenen rondde ik mijn praktijk- en theorie-examen af, met prachtige cijfers."],
-    ["Nu","Mijn salon aan huis","Nu oefen ik in mijn salon aan huis met veel liefde en geduld dit prachtige beroep uit."]
-  ],
-  education:[
-    ["Allround nagelstyliste","Opleiding tot allround nagelstyliste, afgerond met een praktijk- en theorie-examen in 2021."],
-    ["Vervolgopleidingen en specialistische nagelcertificaten","Aanvullende opleidingen om mijn vakkennis en technieken verder te verdiepen."],
-    ["NAIL register","Aangesloten bij het kwaliteitsregister voor nagelstylisten in Nederland."]
-  ],
-  values:[
-    ["Alle tijd voor u","Ik ben zeker geen productiebedrijf. Een nagelbehandeling duurt 1,5 tot 2 uur, zodat ik zorgvuldig kan werken."],
-    ["De natuurlijke nagel voorop","De gezondheid van uw eigen nagel staat bij elke behandeling centraal."],
-    ["Kort en medium","Ik verzorg korte nagels en nagels met een medium lengte. Extreem lange nagels alleen op aanvraag."],
-    ["Hygiënisch werken","Ik werk met hygiënische vijlen: voor elke klant een nieuwe set."]
-  ],
-  register:{
-    intro:"Het NAIL register is het kwaliteitsregister voor nagelstylisten in Nederland. Nagelstylisten in het register:",
-    points:["voldoen aan kwaliteitseisen op het niveau van de Allround Nagelstylist (NLQF-3)","beschikken over de benodigde diploma's","scholen zich verplicht bij om hun vakkennis op peil te houden","werken volgens de gedragscode van het register"],
-    you:"Voor u maakt het zichtbaar dat uw nagelstylist goed is opgeleid en haar vak serieus neemt. Het register is openbaar: iedereen kan het raadplegen."
-  }
+  logo:{srcs:["/assets/marli-logo-glossy.png"],alt:"Marli Nails"}
 };
+/* Prijscategorieën op volgorde van prijzen.json (ankers in de prijslijst). */
+const PRICE_GROUP_IDS=['natuurlijk','verlenging','afwerking','overig','manicure','teennagels','heren'];
+/* Behandelkaarten op de homepage, op volgorde van home.json: naar welke
+   prijscategorie ze linken en waar het "Vanaf"-bedrag vandaan komt. */
+const SERVICE_LINKS=[
+  {to:'manicure'},{to:'teennagels'},{to:'natuurlijk'},
+  {to:'afwerking',row:1,suffix:' per nagel'}
+];
+const FOCUS={center:'50% 50%',top:'50% 25%',bottom:'50% 75%'};
+
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+/* *schuin* wordt de roze cursieve accenttekst, een nieuwe regel wordt een regelafbreking. */
+const rich=s=>esc(s).replace(/\*([^*\n]+)\*/g,'<em>$1</em>').replace(/\n/g,'<br>');
+const lookup=(obj,path)=>path.split('.').reduce((o,k)=>o==null?undefined:o[k],obj);
+const hasValue=v=>v!==null&&v!==undefined&&v!=='';
+/* Foto's: `-1440.webp` heeft altijd een `-640.webp` naast zich (npm run images,
+   of de build voor uploads via /admin); andere bestanden worden direct gebruikt. */
+function imgOf(src,alt,{sizes='(min-width:1180px) 440px, (min-width:600px) 45vw, 80vw',ratio='4:5',focus,label}={}){
+  if(!src) return {srcs:[],alt,ratio,label};
+  const img={srcs:[src],alt:alt||'',ratio,label,focus:FOCUS[focus]||FOCUS.center};
+  if(/-1440\.webp$/.test(src)){img.srcset=`${src.replace(/-1440\.webp$/,'-640.webp')} 640w, ${src} 1440w`;img.sizes=sizes}
+  return img;
+}
+const dutchDate=iso=>new Intl.DateTimeFormat('nl-NL',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${iso}T00:00:00Z`));
+const dayBefore=iso=>new Date(Date.parse(`${iso}T00:00:00Z`)-864e5).toISOString().slice(0,10);
+const num=v=>hasValue(v)?Number(v):null;
+
+/* Zet de JSON-bestanden om naar de vorm die de pagina's gebruiken. */
+function adapt(J){
+  const H=J.home,P=J.prijzen,O=J.over;
+  const card='(min-width:1180px) 300px, (min-width:860px) 45vw, 120px';
+  const prices=P.groups.map((g,i)=>{
+    const rows=g.rows.map(r=>{const k=num(r.price),m=num(r.medium);return {name:r.name,desc:r.desc,price:m===null?k:[k,m],hand:!!r.hand}});
+    return {id:PRICE_GROUP_IDS[i]||`groep-${i+1}`,title:g.title,intro:g.intro,single:g.rows.every(r=>!hasValue(r.medium)),rows};
+  });
+  return {...SITE,J,
+    images:{
+      hero:imgOf(H.hero.photo.src,H.hero.photo.alt,{sizes:'100vw',ratio:null,label:'Foto'}),
+      about:imgOf(O.portrait.src,O.portrait.alt,{sizes:'(min-width:1024px) 520px, (min-width:600px) 420px, 90vw',focus:O.portrait.focus,label:'Marjon van Rossum'})
+    },
+    facts:H.welcome.facts,
+    services:H.treatments.cards.map((c,i)=>({name:c.name,text:c.text,...(SERVICE_LINKS[i]||{to:PRICE_GROUP_IDS[0]}),img:imgOf(c.photo,'',{sizes:card,label:c.name})})),
+    gallery:H.gallery.photos.map(p=>({...imgOf(p.src,p.alt,{focus:p.focus,label:p.caption}),caption:p.caption})),
+    priceChange:{date:P.change.date,label:dutchDate(P.change.date),until:dutchDate(dayBefore(P.change.date)),increase:Number(P.change.increase)},
+    pricesSince:dutchDate(P.since),
+    prices,
+    priceNotes:[P.lengthNote,P.cancelNote],
+    toeNote:P.toeNote,
+    products:J.producten.categories.map(c=>({title:c.title,items:c.items.map(i=>[i.name,i.size,num(i.price)])})),
+    timeline:O.story.timeline.map(t=>[t.period,t.title,t.text]),
+    education:O.education.items.map(e=>[e.title,e.text]),
+    values:O.values.items.map(v=>[v.title,v.text]),
+    register:O.register
+  };
+}
+
+/* window.MARLI_CONTENT komt uit /content.js, door de build gemaakt uit public/content/*.json. */
+try{
+  if(!window.MARLI_CONTENT) throw new Error('content.js ontbreekt');
+  render(adapt(window.MARLI_CONTENT));
+}catch(error){
+  console.error('Inhoud kon niet worden geladen:',error);
+  $('#main').innerHTML=`<div class="wrap no-js"><h1 tabindex="-1">Welkom bij Marli Nails</h1><p>De pagina kon niet volledig worden geladen. Probeer het later opnieuw, of bel <a href="tel:${SITE.business.phoneIntl}">${esc(SITE.business.phone)}</a> of mail <a href="mailto:${SITE.business.email}">${esc(SITE.business.email)}</a>.</p></div>`;
+}
 
 /* =====================================================================
    RENDER
    ===================================================================== */
-const C=CONTENT,B=C.business,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function render(CONTENT){
+const C=CONTENT,B=C.business;
 const tel=`tel:${B.phoneIntl}`,mail=`mailto:${B.email}`;
 const route=`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${B.street}, ${B.postcode} ${B.city}`)}`;
+
+/* Bewerkbare teksten: data-c = platte tekst, data-c-rich = met *accent* en regelafbrekingen. */
+$$('[data-c]').forEach(el=>{const v=lookup(C.J,el.dataset.c);if(hasValue(v))el.textContent=v});
+$$('[data-c-rich]').forEach(el=>{const v=lookup(C.J,el.dataset.cRich);if(hasValue(v))el.innerHTML=rich(v)});
+$('#facts').innerHTML=C.facts.map(f=>`<li><strong>${esc(f.title)}</strong><span>${esc(f.text)}</span></li>`).join('');
 
 function placeholder(el,label){
   console.error('Afbeelding niet beschikbaar:',label);
@@ -163,8 +142,11 @@ const money=n=>n.toFixed(2).replace('.',',');
 const eur=n=>n===0?'Gratis':`€\u00A0${money(n)}`;
 const eurShort=n=>`€\u00A0${Number.isInteger(n)?n:money(n)}`;
 const priceOf=(row,future)=>{const add=future&&row.hand?PC.increase:0;return Array.isArray(row.price)?row.price.map(p=>p+add):row.price+add};
-const fromPrice=(id,future)=>Math.min(...C.prices.find(g=>g.id===id).rows.map(r=>[].concat(priceOf(r,future))[0]));
-const serviceFrom=(s,future)=>s.fixedFrom||`Vanaf ${eurShort(fromPrice(s.prices,future))}`;
+const serviceFrom=(s,future)=>{
+  const g=C.prices.find(x=>x.id===s.to);if(!g)return '';
+  const rows=(s.row!=null?[g.rows[s.row]]:g.rows).filter(Boolean);if(!rows.length)return '';
+  return `Vanaf ${eurShort(Math.min(...rows.map(r=>[].concat(priceOf(r,future))[0])))}${s.suffix||''}`;
+};
 
 $('#cards').innerHTML=C.services.map((s,i)=>`<li><a class="card" href="#/prijslijst/${s.to}"><div class="ph reveal" data-card="${i}"></div><div class="card-b"><span class="treat-number" aria-hidden="true">0${i+1}</span><h3>${esc(s.name)}</h3><p>${esc(s.text)}</p><div class="card-f"><span class="price">${esc(serviceFrom(s,changeActive))}</span><span class="go">Bekijk prijzen<span aria-hidden="true">↗</span></span></div></div></a></li>`).join('');
 $$('[data-card]').forEach(el=>{fill(el,{...C.services[+el.dataset.card].img,alt:''},{ratio:false});el.setAttribute('aria-hidden','true')});
@@ -199,7 +181,7 @@ $('#pmain').addEventListener('click',e=>{
 });
 
 /* Producten */
-$('#prods').innerHTML=C.products.map((c,i)=>`<section class="pcat" aria-labelledby="pc-${i}"><h2 id="pc-${i}">${c.title}</h2><ul class="prow pitems">${c.items.map(([n,s,p])=>`<li><div class="pline"><span class="nm">${esc(n)}</span><span class="dots" aria-hidden="true"></span><span class="pr">€ ${esc(p)}</span></div><span class="sz">${esc(s)}</span></li>`).join('')}</ul></section>`).join('')+`<div class="prod-note"><p>Vragen over een product? Bel of mail gerust.</p><a class="btn btn-pink" href="#/contact">Neem contact op</a></div>`;
+$('#prods').innerHTML=C.products.map((c,i)=>`<section class="pcat" aria-labelledby="pc-${i}"><h2 id="pc-${i}">${rich(c.title)}</h2><ul class="prow pitems">${c.items.map(([n,s,p])=>`<li><div class="pline"><span class="nm">${esc(n)}</span><span class="dots" aria-hidden="true"></span><span class="pr">€ ${money(p)}</span></div><span class="sz">${esc(s)}</span></li>`).join('')}</ul></section>`).join('')+`<div class="prod-note"><p>Vragen over een product? Bel of mail gerust.</p><a class="btn btn-pink" href="#/contact">Neem contact op</a></div>`;
 
 /* Over */
 $('#tl').innerHTML=C.timeline.map(([y,h,p])=>`<li><span class="yr">${esc(y)}</span><div><h3>${esc(h)}</h3><p>${esc(p)}</p></div></li>`).join('');
@@ -313,3 +295,4 @@ $('[data-scroll-welcome]').addEventListener('click',event=>{
   $('#h-welkom').setAttribute('tabindex','-1');
   $('#h-welkom').focus({preventScroll:true});
 });
+}

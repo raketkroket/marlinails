@@ -1,0 +1,50 @@
+{
+  "title": "Ik zal mijzelf *even voorstellen*",
+  "lead": "Ik ben Marjon van Rossum. Ik woon sinds 1985 in Almere, ben getrouwd en heb twee volwassen kinderen.",
+  "text": "In mijn salon aan huis oefen ik met veel liefde en geduld dit prachtige beroep uit. Ik werk met de professionele producten van Magnetic.",
+  "portrait": {
+    "src": "/assets/20211113_122901-1440.webp",
+    "alt": "Portret van Marjon van Rossum, eigenaresse en nagelstyliste van Marli Nails",
+    "focus": "top"
+  },
+  "story": {
+    "title": "Van hobby\nnaar *vak.*",
+    "intro": "Wat ooit begon als een leuke hobby, is uitgegroeid tot een prachtig beroep dat ik met veel liefde en geduld uitoefen.",
+    "timeline": [
+      { "period": "Ruim 30 jaar geleden", "title": "Een eerste liefde voor nagels", "text": "Ik ontdekte de nagelbranche en vond het een ontzettend leuke hobby. Destijds heb ik er niets mee gedaan, mede door een drukke baan." },
+      { "period": "2020", "title": "Het begint weer te kriebelen", "text": "In 2020 zat ik door de coronaperiode noodgedwongen drie maanden thuis. In die periode begon mijn interesse in nagelstyling opnieuw te groeien en besloot ik mij verder te verdiepen in het vak. Ik volgde de opleiding tot allround nagelstyliste, aangevuld met vervolgopleidingen en specialistische nagelcertificaten." },
+      { "period": "2021", "title": "Examen behaald", "text": "Na veel oefenen rondde ik mijn praktijk- en theorie-examen af, met prachtige cijfers." },
+      { "period": "Nu", "title": "Mijn salon aan huis", "text": "Nu oefen ik in mijn salon aan huis met veel liefde en geduld dit prachtige beroep uit." }
+    ]
+  },
+  "education": {
+    "title": "Opleiding en *certificaten*",
+    "intro": "Goed opgeleid en blijven leren: zo krijgen uw nagels de zorg die ze verdienen.",
+    "items": [
+      { "title": "Allround nagelstyliste", "text": "Opleiding tot allround nagelstyliste, afgerond met een praktijk- en theorie-examen in 2021." },
+      { "title": "Vervolgopleidingen en specialistische nagelcertificaten", "text": "Aanvullende opleidingen om mijn vakkennis en technieken verder te verdiepen." },
+      { "title": "NAIL register", "text": "Aangesloten bij het kwaliteitsregister voor nagelstylisten in Nederland." }
+    ]
+  },
+  "values": {
+    "title": "Zo werk ik",
+    "intro": "Een salon aan huis, waar uw nagels de aandacht krijgen die ze verdienen.",
+    "items": [
+      { "title": "Alle tijd voor u", "text": "Ik ben zeker geen productiebedrijf. Een nagelbehandeling duurt 1,5 tot 2 uur, zodat ik zorgvuldig kan werken." },
+      { "title": "De natuurlijke nagel voorop", "text": "De gezondheid van uw eigen nagel staat bij elke behandeling centraal." },
+      { "title": "Kort en medium", "text": "Ik verzorg korte nagels en nagels met een medium lengte. Extreem lange nagels alleen op aanvraag." },
+      { "title": "Hygiënisch werken", "text": "Ik werk met hygiënische vijlen: voor elke klant een nieuwe set." }
+    ]
+  },
+  "register": {
+    "title": "Aangesloten bij het NAIL register",
+    "intro": "Het NAIL register is het kwaliteitsregister voor nagelstylisten in Nederland. Nagelstylisten in het register:",
+    "points": [
+      "voldoen aan kwaliteitseisen op het niveau van de Allround Nagelstylist (NLQF-3)",
+      "beschikken over de benodigde diploma's",
+      "scholen zich verplicht bij om hun vakkennis op peil te houden",
+      "werken volgens de gedragscode van het register"
+    ],
+    "you": "Voor u maakt het zichtbaar dat uw nagelstylist goed is opgeleid en haar vak serieus neemt. Het register is openbaar: iedereen kan het raadplegen."
+  }
+}

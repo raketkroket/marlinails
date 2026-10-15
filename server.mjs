@@ -3,6 +3,7 @@ import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { contentScript, readContent } from './scripts/content.mjs';
 
 export const publicRoot = fileURLToPath(new URL('./public/', import.meta.url));
 const types = {
@@ -13,8 +14,26 @@ const types = {
   '.jpg': 'image/jpeg',
   '.webp': 'image/webp',
   '.woff2': 'font/woff2',
-  '.ttf': 'font/ttf'
+  '.ttf': 'font/ttf',
+  '.yml': 'text/yaml; charset=utf-8'
 };
+
+// /admin/ only (Decap CMS): its pinned, integrity-checked bundle from unpkg, the GitHub API
+// for reading/saving content, and inline styles that the CMS interface injects. Decap's
+// config validator (Ajv) compiles schemas at runtime, so this page needs 'unsafe-eval';
+// the public site keeps its strict policy.
+export const adminContentSecurityPolicy = "default-src 'none'; script-src 'self' 'unsafe-eval' https://unpkg.com; " +
+  "style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://avatars.githubusercontent.com; " +
+  "font-src 'self' data:; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'none'; " +
+  "form-action 'none'; frame-ancestors 'none'";
+
+export async function adminHeaders({ https = false } = {}) {
+  return {
+    ...(await securityHeaders({ https })),
+    'Content-Security-Policy': adminContentSecurityPolicy,
+    'X-Robots-Tag': 'noindex, nofollow'
+  };
+}
 
 export async function securityHeaders({ https = false } = {}) {
   const html = await readFile(path.join(publicRoot, 'index.html'), 'utf8');
@@ -33,8 +52,10 @@ export async function securityHeaders({ https = false } = {}) {
 
 export async function createSiteServer() {
   const headers = await securityHeaders();
+  const admin = await adminHeaders();
   return http.createServer(async (req, res) => {
-    Object.entries(headers).forEach(([key, value]) => res.setHeader(key, value));
+    const scoped = (req.url || '').startsWith('/admin/') ? admin : headers;
+    Object.entries(scoped).forEach(([key, value]) => res.setHeader(key, value));
     const reply = (status, text) => {
       res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' });
       res.end(req.method === 'HEAD' ? undefined : text);
@@ -56,7 +77,19 @@ export async function createSiteServer() {
       reply(400, 'Invalid request path');
       return;
     }
-    const file = path.resolve(publicRoot, `.${pathname === '/' ? '/index.html' : pathname}`);
+    if (pathname === '/content.js') {
+      // Generated from public/content/*.json, as in the production build.
+      try {
+        const script = contentScript(await readContent(new URL('./public/', import.meta.url)));
+        res.writeHead(200, { 'Content-Type': types['.js'], 'Content-Length': Buffer.byteLength(script), 'Cache-Control': 'no-cache' });
+        res.end(req.method === 'HEAD' ? undefined : script);
+      } catch (error) {
+        console.error('Unable to build content script:', error);
+        reply(500, 'Unable to load resource');
+      }
+      return;
+    }
+    const file = path.resolve(publicRoot, `.${pathname.endsWith('/') ? `${pathname}index.html` : pathname}`);
     const relative = path.relative(publicRoot, file);
     const extension = path.extname(file);
     if (relative.startsWith('..') || path.isAbsolute(relative) || !types[extension]) {

@@ -1,0 +1,71 @@
+{
+  "intro": "Alle behandelingen met prijzen in euro's. Marli Nails verzorgt korte nagels en nagels met een medium lengte.",
+  "since": "2025-09-01",
+  "change": {
+    "date": "2027-01-01",
+    "increase": 2.5
+  },
+  "groups": [
+    {
+      "title": "Natural nail treatments",
+      "intro": "Voor de natuurlijke nagel, met gelpolish of blushes naar keuze.",
+      "rows": [
+        { "name": "Natural Nail treatment (BIAB)", "desc": "Met gelpolish naar keuze", "price": 50, "medium": 52.5, "hand": true },
+        { "name": "Natural Nail treatment incl. Russian Manicure", "desc": "Met blushes naar keuze", "price": 60, "medium": 62.5, "hand": true }
+      ]
+    },
+    {
+      "title": "Sets met verlenging",
+      "intro": "",
+      "rows": [
+        { "name": "Nieuwe set met verlenging met gelpolish", "desc": "Met behulp van sjablonen of shape-its", "price": 65, "medium": 67.5, "hand": true },
+        { "name": "Set met verlenging Babyboom", "desc": "", "price": 67.5, "medium": 70, "hand": true },
+        { "name": "Set met verlenging Reverse French of Inlay", "desc": "Afhankelijk van het aantal nagels: 2,50 per nagel", "price": 80, "medium": 82.5, "hand": true }
+      ]
+    },
+    {
+      "title": "Seal & Protect en nail art",
+      "intro": "",
+      "rows": [
+        { "name": "Seal & Protect", "desc": "", "price": 15, "medium": 17.5, "hand": true },
+        { "name": "Nail art", "desc": "Per nagel, vanaf", "price": 3, "medium": null, "hand": false }
+      ]
+    },
+    {
+      "title": "Reparatie en verwijderen",
+      "intro": "",
+      "rows": [
+        { "name": "Breuk tot 2 nagels", "desc": "Reparatie binnen 3 dagen na de behandeling", "price": 0, "medium": null, "hand": false },
+        { "name": "Breuk per nagel", "desc": "", "price": 10, "medium": 12.5, "hand": false },
+        { "name": "Verwijderen gelpolish", "desc": "Zonder nabehandeling", "price": 17.5, "medium": null, "hand": false }
+      ]
+    },
+    {
+      "title": "Manicure",
+      "intro": "Natuurlijke nagelverzorging.",
+      "rows": [
+        { "name": "Brons", "desc": "Incl. nagels polijsten, nagelriem treatment en lotion", "price": 35, "medium": null, "hand": true },
+        { "name": "Zilver", "desc": "Brons plus scrub en handmasker", "price": 40, "medium": null, "hand": true },
+        { "name": "Goud", "desc": "Zilver plus massage", "price": 50, "medium": null, "hand": true }
+      ]
+    },
+    {
+      "title": "Teennagels",
+      "intro": "Cosmetische afwerking van de teennagels.",
+      "rows": [
+        { "name": "Teennagels gelpolish", "desc": "", "price": 35, "medium": null, "hand": false },
+        { "name": "Teennagels french manicure", "desc": "", "price": 37.5, "medium": null, "hand": false }
+      ]
+    },
+    {
+      "title": "Voor heren",
+      "intro": "",
+      "rows": [
+        { "name": "E-manicure voor heren", "desc": "", "price": 27.5, "medium": null, "hand": true }
+      ]
+    }
+  ],
+  "toeNote": "Marli Nails brengt gelpolish of een french manicure aan op uw teennagels. Dit is een cosmetische behandeling. Marjon is geen pedicure en voert geen medische voetbehandelingen uit.",
+  "lengthNote": "Marli Nails verzorgt alleen korte nagels en nagels met een medium lengte. (Extreem) lange nagels alleen op aanvraag.",
+  "cancelNote": "Bij annulering binnen 24 uur voor de afspraak dient 50% van de behandeling betaald te worden."
+}

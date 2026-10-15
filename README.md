@@ -52,7 +52,11 @@ keyboard, real-device and 200% browser zoom testing remains important.
 - `public/index.html`: existing page layout and business metadata.
 - `public/styles.css`: white/pink design, DM Sans and DM Serif Display, responsive styles.
 - `public/editorial.css`: the current warm editorial theme.
-- `public/app.js`: business content, published prices, navigation and email-draft form.
+- `public/content/*.json`: editable texts, photos and prices (edited via `/admin`).
+- `public/app.js`: fixed business details (phone, address, hours), rendering,
+  navigation, dated prices and the email-draft form.
+- `public/admin/`: Decap CMS admin; `api/`: its GitHub login (Vercel functions).
+- `scripts/content.mjs`: bundles the content JSON into `/content.js`.
 - `public/assets/`: original salon images/logo and locally hosted Google Fonts.
 - `server.mjs`: dependency-free, read-only public-file server with security headers.
 - `dist/`: static deployment output produced by `npm run build`.
@@ -63,7 +67,8 @@ Import `raketkroket/marlinails`, use the repository root, and set the production
 branch to `main`. The checked-in `vercel.json` selects the Other framework preset,
 runs `npm ci` and `npm run build`, and publishes only `dist`. Use Node.js 24.x.
 Pushing to `main` triggers a production deployment when the Vercel Git integration
-is enabled. No environment variables or backend are needed.
+is enabled. The public site needs no environment variables; the admin login
+needs two (see "Content editing (admin)").
 
 Vercel does not use the generated `_headers` file. `vercel.json` explicitly applies
 the production security headers instead; the build fails if they differ from the
@@ -95,10 +100,11 @@ themselves, or call. No new booking system has been invented.
 
 ## Prices and the 1 January 2027 increase
 
-Treatment prices live in `CONTENT.prices` in `public/app.js` as numbers
-(`[kort, medium]` or a single amount). Rows marked `hand: true` are hand
-treatments; Marjon asked for these to rise by €2.50 per 1 January 2027.
-`CONTENT.priceChange` holds the date, label and amount.
+Treatment prices live in `public/content/prijzen.json` (editable via `/admin`):
+`price` (kort, or the only price) and optional `medium`. Rows with `hand: true`
+("Handbehandeling" in the admin) are hand treatments; Marjon asked for these to
+rise by €2.50 per 1 January 2027. `change` holds the date and amount; the Dutch
+date labels are derived from it.
 
 - Until 31 December 2026 (Dutch time, `Europe/Amsterdam`) the current prices
   are shown. The price list announces the change and lets visitors switch to
@@ -110,7 +116,7 @@ treatments; Marjon asked for these to rise by €2.50 per 1 January 2027.
 - Not raised: teennagels, Seduction products, the free repair.
 - **Awaiting Marjon's confirmation, currently not raised:** nail art
   (€3,00 per nagel), breuk per nagel (€10,00/€12,50) and verwijderen gelpolish
-  (€17,50). To include one, add `hand: true` to its row.
+  (€17,50). Marjon can tick "Handbehandeling" for these in the admin.
 - After the change has passed, the base prices can be updated and
   `priceChange` moved to the next change (or the announcement removed).
 
@@ -118,13 +124,14 @@ Browser tests fix the clock to verify both sides of the switch.
 
 ## Replacing photos
 
-1. Put the original in `public/` (or `public/assets/`).
-2. Add its file name in `scripts/optimize-images.mjs` if it is not a
-   `2026XXXX_XXXXXX.jpg` file, then run `npm run images`.
-3. Change the name, `alt` text and caption in `CONTENT` (`images`, `services`
-   or `gallery`). `focus` controls the crop (CSS `object-position`).
+Via `/admin`: choose a new photo in the field, adjust the description and
+caption, and publish. Uploads go to `public/assets/uploads/`; the build deploys
+only resized 640/1440 px WebP copies (orientation fixed, metadata such as GPS
+removed). The original upload does stay in the (public) GitHub repository.
 
-The profile photo is `CONTENT.images.about` (currently `20211113_122901`).
+By hand: put the original in `public/`, add it to `scripts/optimize-images.mjs`
+if needed, run `npm run images`, and point the JSON at its `-1440.webp` copy.
+The profile photo is `over.json` → `portrait` (also used on the homepage).
 
 ## Domain: marlinails.vercel.app → www.marlinails.nl
 
@@ -146,8 +153,36 @@ the domain points here. To migrate (with Marjon's approval):
 
 ## Content editing (admin)
 
-Not implemented. See `docs/ADMIN-CMS-OPTIONS.md` for options, costs and the
-approvals needed.
+`/admin/` runs [Decap CMS](https://decapcms.org/) 3.16.3 (pinned, with
+subresource integrity). Marjon can edit existing texts, photos, captions and
+prices on all five pages; she cannot add or remove pages, sections or list items.
+Phone, email, address and opening hours stay fixed in `public/app.js` because
+they also appear in the structured data. Every save is a commit on `main`, so
+Vercel redeploys within about a minute and any change can be reverted in Git.
+Dutch guide for Marjon: `docs/BEHEER-HANDLEIDING.md`. Options considered:
+`docs/ADMIN-CMS-OPTIONS.md`.
+
+One-time setup (until this is done, `/admin/` shows the login but it fails safely):
+
+1. GitHub → Settings → Developer settings → OAuth Apps → New OAuth App.
+   Homepage `https://marlinails.vercel.app`, callback
+   `https://marlinails.vercel.app/api/callback`. Generate a client secret.
+2. Vercel → Project → Settings → Environment Variables (Production):
+   `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET`. Redeploy.
+3. Marjon creates a GitHub account; invite it under the repository's
+   Settings → Collaborators with write access. Only accounts with write access
+   can save.
+4. After the domain move, change the OAuth app URLs and `site_url`/`display_url`
+   in `public/admin/config.yml` to `https://www.marlinails.nl`.
+
+Security: the secret exists only in Vercel; `api/auth.js` and `api/callback.js`
+use a one-time state cookie, never store tokens, and hand the token only to the
+same-origin admin window. `/admin/` has its own CSP (CMS bundle from unpkg,
+GitHub API, and `'unsafe-eval'`, which Decap's config validator needs); the
+public site keeps its strict CSP and loads content from the same-origin
+`/content.js`. `tests/admin.test.mjs` checks that every content field is
+editable (so saves never drop data), that lists cannot grow or shrink, the
+OAuth flow, and upload optimization.
 
 ## Content and assets
 

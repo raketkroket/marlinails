@@ -1,0 +1,31 @@
+{
+  "intro": "Ook verkoopt Marli Nails de verzorgingsproducten van Seduction. Alle prijzen zijn in euro's.",
+  "categories": [
+    {
+      "title": "Voor de *handen*",
+      "items": [
+        { "name": "Liquid Hand Soap", "size": "250 ml", "price": 19.95 },
+        { "name": "Hand Lotion", "size": "50 ml", "price": 12.95 },
+        { "name": "Hand Lotion", "size": "250 ml", "price": 29.95 },
+        { "name": "Hand Rich Cream & Mask", "size": "250 ml", "price": 32.95 },
+        { "name": "Hand Scrub", "size": "250 ml", "price": 29.95 }
+      ]
+    },
+    {
+      "title": "Voor de *nagelriemen*",
+      "items": [
+        { "name": "Intense Cuticle Cream", "size": "10 ml", "price": 10.95 },
+        { "name": "Intense Cuticle Cream", "size": "50 ml", "price": 21.95 },
+        { "name": "Intense Cuticle Cream", "size": "150 ml", "price": 49.5 },
+        { "name": "Cuticle Oil", "size": "15 ml", "price": 12.95 }
+      ]
+    },
+    {
+      "title": "Cadeau en *ontspanning*",
+      "items": [
+        { "name": "Bath Bombs", "size": "24 stuks", "price": 19.95 },
+        { "name": "Gift box", "size": "Oil, scrub, mask en lotion", "price": 69.95 }
+      ]
+    }
+  ]
+}

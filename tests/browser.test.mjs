@@ -1,5 +1,6 @@
 import { before, after, test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import { createSiteServer } from '../server.mjs';
@@ -463,4 +464,93 @@ test('mobile gallery scrolls horizontally inside its row and opens every photo',
   assert.match(await page.locator('#lbCap').innerText(), /1 van 6/);
   await page.locator('#lbClose').click();
   await page.close();
+});
+
+test('content edited via /admin (content JSON) drives texts, photos and prices on the site', async () => {
+  const page = await newPage({ reducedMotion: 'reduce' });
+  await page.clock.setFixedTime(new Date('2026-10-15T12:00:00+02:00'));
+  const content = await (await page.request.get(`${origin}/content.js`)).text();
+  const data = JSON.parse(content.replace(/^window\.MARLI_CONTENT=/, '').replace(/;\s*$/, ''));
+  data.home.hero.title = 'Nieuwe titel\n*met accent*';
+  data.home.gallery.photos[0].caption = 'Nieuw bijschrift <b>';
+  data.prijzen.groups[0].rows[0].price = 51;
+  data.prijzen.groups[2].rows[1].hand = true;
+  data.producten.categories[0].items[0].price = 20.5;
+  data.over.story.timeline[1].text = 'Aangepaste tekst.';
+  await page.route('**/content.js', route => route.fulfill({ contentType: 'text/javascript', body: `window.MARLI_CONTENT=${JSON.stringify(data)};` }));
+  await navigate(page, 'home');
+  assert.equal(await page.locator('#h-home').innerHTML(), 'Nieuwe titel<br><em>met accent</em>');
+  assert.equal(await page.locator('.gal figcaption span').nth(1).textContent(), 'Nieuw bijschrift <b>');
+  assert.equal(await page.locator('.card .price').nth(2).innerText(), 'Vanaf € 51');
+  await navigate(page, 'prijslijst');
+  assert.equal((await page.locator('#natuurlijk tbody td').first().innerText()).replace(/\s/g, ' '), '€ 51,00');
+  await page.locator('[data-period="future"]').click();
+  assert.equal((await page.locator('#natuurlijk tbody td').first().innerText()).replace(/\s/g, ' '), '€ 53,50');
+  assert.match((await page.locator('#afwerking tbody tr').nth(1).innerText()).replace(/\s/g, ' '), /€ 5,50/);
+  await navigate(page, 'producten');
+  assert.match(await page.locator('#prods').innerText(), /€ 20,50/);
+  await navigate(page, 'over');
+  assert.match(await page.locator('#tl').innerText(), /Aangepaste tekst\./);
+  await page.close();
+});
+
+test('a missing content script shows contact details instead of a broken page', async () => {
+  const page = await newPage();
+  const errors = [];
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  await page.route('**/content.js', route => route.fulfill({ status: 404, body: '' }));
+  await page.goto(`${origin}/#/`);
+  await page.locator('#main .no-js').waitFor();
+  assert.match(await page.locator('#main').innerText(), /06 22889353/);
+  assert.ok(errors.some(text => /Inhoud kon niet worden geladen/.test(text)));
+  await page.close();
+});
+
+test('GitHub login popup hands the token only to the same-origin admin window', async () => {
+  const page = await newPage();
+  await page.goto(`${origin}/`);
+  const callback = `<!doctype html><html><body><p id="oauth-message"></p><script type="application/json" id="oauth-result">${
+    JSON.stringify({ status: 'success', content: { token: 'abc', provider: 'github' } })}</script><script src="/admin/oauth-callback.js"></script></body></html>`;
+  await page.context().route('**/api/callback*', route => route.fulfill({ contentType: 'text/html', body: callback }));
+  const result = await page.evaluate(() => new Promise(resolve => {
+    const popup = window.open('/api/callback?code=x&state=y');
+    window.addEventListener('message', event => {
+      if (event.data === 'authorizing:github') event.source.postMessage(event.data, event.origin);
+      else resolve({ data: event.data, origin: event.origin, same: event.origin === location.origin, popup: !!popup });
+    });
+  }));
+  assert.equal(result.same, true);
+  assert.equal(result.data, 'authorization:github:success:{"token":"abc","provider":"github"}');
+  await page.close();
+});
+
+test('admin (Decap CMS) loads under its own scoped CSP and lists only the five pages', async t => {
+  const online = await fetch('https://unpkg.com/decap-cms@3.16.3/dist/decap-cms.js', { method: 'HEAD' }).then(r => r.ok, () => false);
+  if (!online) { t.skip('unpkg.com not reachable'); return; }
+  const page = await newPage();
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  const response = await page.goto(`${origin}/admin/`);
+  assert.match(response.headers()['content-security-policy'], /script-src 'self' 'unsafe-eval' https:\/\/unpkg\.com/);
+  assert.equal(response.headers()['x-robots-tag'], 'noindex, nofollow');
+  await page.getByRole('button', { name: /Inloggen met GitHub/ }).waitFor({ timeout: 20000 });
+  // Decap's in-memory test backend stands in for GitHub to show the editor.
+  const files = {};
+  for (const name of ['home', 'prijzen', 'producten', 'over', 'contact']) {
+    files[`${name}.json`] = { content: await readFile(new URL(`../public/content/${name}.json`, import.meta.url), 'utf8') };
+  }
+  const test = await newPage();
+  test.on('pageerror', error => errors.push(error.message));
+  await test.route('**/admin/admin.js', route => route.fulfill({ contentType: 'text/javascript',
+    body: `window.repoFiles=${JSON.stringify({ public: { content: files } })};window.CMS.init({config:{backend:{name:'test-repo'}}});` }));
+  await test.goto(`${origin}/admin/`);
+  await test.getByRole('button', { name: /Inloggen/ }).click();
+  await test.getByText('Over Marli Nails', { exact: true }).waitFor({ timeout: 20000 });
+  const text = await test.locator('body').innerText();
+  for (const label of ['Home', 'Prijslijst', 'Producten Seduction', 'Over Marli Nails', 'Contact']) assert.match(text, new RegExp(label));
+  assert.doesNotMatch(text, /Nieuwe? Pagina/i);
+  assert.deepEqual(errors, []);
+  await page.close();
+  await test.close();
 });

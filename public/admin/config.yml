@@ -1,0 +1,697 @@
+# Decap CMS configuration (JSON syntax, valid YAML). Backend settings: admin.js.
+{
+  "locale": "nl",
+  "site_url": "https://marlinails.vercel.app",
+  "display_url": "https://marlinails.vercel.app",
+  "logo_url": "/assets/marli-logo-glossy.png",
+  "publish_mode": "simple",
+  "media_folder": "public/assets/uploads",
+  "public_folder": "/assets/uploads",
+  "editor": {
+    "preview": false
+  },
+  "collections": [
+    {
+      "name": "paginas",
+      "label": "Pagina's",
+      "label_singular": "Pagina",
+      "editor": {
+        "preview": false
+      },
+      "description": "Pas bestaande teksten, foto's en prijzen aan. Na opslaan staat de wijziging binnen ongeveer een minuut op de website.",
+      "files": [
+        {
+          "name": "home",
+          "label": "Home",
+          "file": "public/content/home.json",
+          "fields": [
+            {
+              "name": "hero",
+              "label": "Bovenaan (grote foto)",
+              "widget": "object",
+              "collapsed": true,
+              "fields": [
+                {
+                  "name": "prelude",
+                  "label": "Korte zin boven de titel",
+                  "widget": "string"
+                },
+                {
+                  "name": "title",
+                  "label": "Titel",
+                  "widget": "text",
+                  "hint": "Zet *sterretjes* rond woorden voor de schuine roze accenttekst. Een nieuwe regel geeft een regelafbreking."
+                },
+                {
+                  "name": "text",
+                  "label": "Tekst",
+                  "widget": "text"
+                },
+                {
+                  "name": "photo",
+                  "label": "Foto",
+                  "widget": "object",
+                  "fields": [
+                    {
+                      "name": "src",
+                      "label": "Foto",
+                      "widget": "image",
+                      "choose_url": false,
+                      "hint": "Liggende foto werkt het best. Tekst staat links over de foto."
+                    },
+                    {
+                      "name": "alt",
+                      "label": "Beschrijving van de foto",
+                      "widget": "string",
+                      "hint": "Voor slechtziende bezoekers en Google, bijvoorbeeld \"Rode nagels met witte bloemen\"."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "welcome",
+              "label": "Welkom",
+              "widget": "object",
+              "collapsed": true,
+              "fields": [
+                {
+                  "name": "title",
+                  "label": "Titel",
+                  "widget": "text",
+                  "hint": "Zet *sterretjes* rond woorden voor de schuine roze accenttekst. Een nieuwe regel geeft een regelafbreking."
+                },
+                {
+                  "name": "lead",
+                  "label": "Inleiding (groot)",
+                  "widget": "text",
+                  "hint": "Zet *sterretjes* rond woorden voor de schuine roze accenttekst. Een nieuwe regel geeft een regelafbreking."
+                },
+                {
+                  "name": "text",
+                  "label": "Tekst",
+                  "widget": "text"
+                },
+                {
+                  "name": "facts",
+                  "label": "Vier kenmerken",
+                  "widget": "list",
+                  "allow_add": false,
+                  "allow_remove": false,
+                  "allow_reorder": false,
+                  "collapsed": true,
+                  "summary": "{{fields.title}}",
+                  "fields": [
+                    {
+                      "name": "title",
+                      "label": "Kop",
+                      "widget": "string"
+                    },
+                    {
+                      "name": "text",
+                      "label": "Tekst",
+                      "widget": "string"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "treatments",
+              "label": "Behandelingen",
+              "widget": "object",
+              "collapsed": true,
+              "hint": "De \"Vanaf\"-prijzen komen automatisch uit de prijslijst.",
+              "fields": [
+                {
+                  "name": "title",
+                  "label": "Titel",
+                  "widget": "string",
+                  "hint": "Zet *sterretjes* rond woorden voor de schuine roze accenttekst. Een nieuwe regel geeft een regelafbreking."
+                },
+                {
+                  "name": "intro",
+                  "label": "Tekst",
+                  "widget": "text"
+                },
+                {
+                  "name": "cards",
+                  "label": "Behandelkaarten",
+                  "widget": "list",
+                  "allow_add": false,
+                  "allow_remove": false,
+                  "allow_reorder": false,
+                  "collapsed": true,
+                  "summary": "{{fields.name}}",
+                  "fields": [
+                    {
+                      "name": "name",
+                      "label": "Naam",
+                      "widget": "string"
+                    },
+                    {
+                      "name": "text",
+                      "label": "Tekst",
+                      "widget": "text"
+                    },
+                    {
+                      "name": "photo",
+                      "label": "Foto",
+                      "widget": "image",
+                      "choose_url": false,
+                      "hint": "Staande foto werkt het best."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "gallery",
+              "label": "Fotogalerij",
+              "widget": "object",
+              "collapsed": true,
+              "fields": [
+                {
+                  "name": "title",
+                  "label": "Titel",
+                  "widget": "text",
+                  "hint": "Zet *sterretjes* rond woorden voor de schuine roze accenttekst. Een nieuwe regel geeft een regelafbreking."
+                },
+                {
+                  "name": "intro",
+                  "label": "Tekst",
+                  "widget": "text"
+                },
+                {
+                  "name": "photos",
+                  "label": "Foto's",
+                  "widget": "list",
+                  "allow_add": false,
+                  "allow_remove": false,
+                  "allow_reorder": true,
+                  "collapsed": true,
+                  "summary": "{{fields.caption}}",
+                  "hint": "Vervang een foto door een nieuwe te kiezen. Staande foto's werken het best.",
+                  "fields": [
+                    {
+                      "name": "src",
+                      "label": "Foto",
+                      "widget": "image",
+                      "choose_url": false
+                    },
+                    {
+                      "name": "alt",
+                      "label": "Beschrijving van de foto",
+                      "widget": "string",
+                      "hint": "Voor slechtziende bezoekers en Google, bijvoorbeeld \"Rode nagels met witte bloemen\"."
+                    },
+                    {
+                      "name": "caption",
+                      "label": "Bijschrift",
+                      "widget": "string"
+                    },
+                    {
+                      "name": "focus",
+                      "label": "Uitsnede",
+                      "widget": "select",
+                      "default": "center",
+                      "hint": "Welk deel van de foto zichtbaar blijft als de foto wordt bijgesneden.",
+                      "options": [
+                        {
+                          "label": "Midden",
+                          "value": "center"
+                        },
+                        {
+                          "label": "Boven",
+                          "value": "top"
+                        },
+                        {
+                          "label": "Onder",
+                          "value": "bottom"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "booking",
+              "label": "Afspraak maken (onderaan)",
+              "widget": "object",
+              "collapsed": true,
+              "fields": [
+                {
+                  "name": "title",
+                  "label": "Titel",
+                  "widget": "text",
+                  "hint": "Zet *sterretjes* rond woorden voor de schuine roze accenttekst. Een nieuwe regel geeft een regelafbreking."
+                },
+                {
+                  "name": "text",
+                  "label": "Tekst",
+                  "widget": "text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "prijzen",
+          "label": "Prijslijst",
+          "file": "public/content/prijzen.json",
+          "fields": [
+            {
+              "name": "intro",
+              "label": "Tekst bovenaan",
+              "widget": "text"
+            },
+            {
+              "name": "since",
+              "label": "Huidige prijzen gelden vanaf",
+              "widget": "datetime",
+              "format": "YYYY-MM-DD",
+              "date_format": "D-M-YYYY",
+              "time_format": false,
+              "picker_utc": true
+            },
+            {
+              "name": "change",
+              "label": "Prijswijziging handbehandelingen",
+              "widget": "object",
+              "hint": "Vanaf deze datum stijgen alle behandelingen met \"Handbehandeling\" aangevinkt met dit bedrag. Tot die datum ziet de website de huidige prijzen met een aankondiging.",
+              "fields": [
+                {
+                  "name": "date",
+                  "label": "Nieuwe prijzen vanaf",
+                  "widget": "datetime",
+                  "format": "YYYY-MM-DD",
+                  "date_format": "D-M-YYYY",
+                  "time_format": false,
+                  "picker_utc": true
+                },
+                {
+                  "name": "increase",
+                  "label": "Verhoging in euro",
+                  "widget": "number",
+                  "value_type": "float",
+                  "min": 0,
+                  "step": 0.5
+                }
+              ]
+            },
+            {
+              "name": "groups",
+              "label": "Categorieën",
+              "widget": "list",
+              "allow_add": false,
+              "allow_remove": false,
+              "allow_reorder": false,
+              "collapsed": true,
+              "summary": "{{fields.title}}",
+              "fields": [
+                {
+                  "name": "title",
+                  "label": "Naam categorie",
+                  "widget": "string"
+                },
+                {
+                  "name": "intro",
+                  "label": "Korte uitleg",
+                  "widget": "string",
+                  "required": false
+                },
+                {
+                  "name": "rows",
+                  "label": "Behandelingen",
+                  "widget": "list",
+                  "allow_add": false,
+                  "allow_remove": false,
+                  "allow_reorder": false,
+                  "collapsed": true,
+                  "summary": "{{fields.name}}",
+                  "fields": [
+                    {
+                      "name": "name",
+                      "label": "Behandeling",
+                      "widget": "string"
+                    },
+                    {
+                      "name": "desc",
+                      "label": "Toelichting",
+                      "widget": "string",
+                      "required": false
+                    },
+                    {
+                      "name": "price",
+                      "label": "Prijs (kort, of de enige prijs)",
+                      "widget": "number",
+                      "value_type": "float",
+                      "min": 0,
+                      "step": 0.05,
+                      "hint": "0 = gratis. Huidige prijs, vóór de prijswijziging."
+                    },
+                    {
+                      "name": "medium",
+                      "label": "Prijs medium",
+                      "widget": "number",
+                      "value_type": "float",
+                      "min": 0,
+                      "step": 0.05,
+                      "hint": "Leeg laten als kort en medium hetzelfde kosten.",
+                      "required": false
+                    },
+                    {
+                      "name": "hand",
+                      "label": "Handbehandeling (stijgt bij de prijswijziging)",
+                      "widget": "boolean",
+                      "default": false,
+                      "required": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "toeNote",
+              "label": "Uitleg over teennagels",
+              "widget": "text"
+            },
+            {
+              "name": "lengthNote",
+              "label": "Opmerking over nagellengte",
+              "widget": "text"
+            },
+            {
+              "name": "cancelNote",
+              "label": "Annuleringsregel",
+              "widget": "text"
+            }
+          ]
+        },
+        {
+          "name": "producten",
+          "label": "Producten Seduction",
+          "file": "public/content/producten.json",
+          "fields": [
+            {
+              "name": "intro",
+              "label": "Tekst bovenaan",
+              "widget": "text"
+            },
+            {
+              "name": "categories",
+              "label": "Categorieën",
+              "widget": "list",
+              "allow_add": false,
+              "allow_remove": false,
+              "allow_reorder": false,
+              "collapsed": true,
+              "summary": "{{fields.title}}",
+              "fields": [
+                {
+                  "name": "title",
+                  "label": "Naam categorie",
+                  "widget": "string",
+                  "hint": "Zet *sterretjes* rond woorden voor de schuine roze accenttekst. Een nieuwe regel geeft een regelafbreking."
+                },
+                {
+                  "name": "items",
+                  "label": "Producten",
+                  "widget": "list",
+                  "allow_add": false,
+                  "allow_remove": false,
+                  "allow_reorder": false,
+                  "collapsed": true,
+                  "summary": "{{fields.name}} {{fields.size}}",
+                  "fields": [
+                    {
+                      "name": "name",
+                      "label": "Product",
+                      "widget": "string"
+                    },
+                    {
+                      "name": "size",
+                      "label": "Inhoud",
+                      "widget": "string"
+                    },
+                    {
+                      "name": "price",
+                      "label": "Prijs in euro",
+                      "widget": "number",
+                      "value_type": "float",
+                      "min": 0,
+                      "step": 0.01
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "over",
+          "label": "Over Marli Nails",
+          "file": "public/content/over.json",
+          "fields": [
+            {
+              "name": "title",
+              "label": "Titel",
+              "widget": "string",
+              "hint": "Zet *sterretjes* rond woorden voor de schuine roze accenttekst. Een nieuwe regel geeft een regelafbreking."
+            },
+            {
+              "name": "lead",
+              "label": "Inleiding (groot)",
+              "widget": "text"
+            },
+            {
+              "name": "text",
+              "label": "Tekst",
+              "widget": "text"
+            },
+            {
+              "name": "portrait",
+              "label": "Profielfoto",
+              "widget": "object",
+              "hint": "Ook gebruikt op de homepage. Staande foto werkt het best.",
+              "fields": [
+                {
+                  "name": "src",
+                  "label": "Foto",
+                  "widget": "image",
+                  "choose_url": false
+                },
+                {
+                  "name": "alt",
+                  "label": "Beschrijving van de foto",
+                  "widget": "string",
+                  "hint": "Voor slechtziende bezoekers en Google, bijvoorbeeld \"Rode nagels met witte bloemen\"."
+                },
+                {
+                  "name": "focus",
+                  "label": "Uitsnede",
+                  "widget": "select",
+                  "default": "center",
+                  "hint": "Welk deel van de foto zichtbaar blijft als de foto wordt bijgesneden.",
+                  "options": [
+                    {
+                      "label": "Midden",
+                      "value": "center"
+                    },
+                    {
+                      "label": "Boven",
+                      "value": "top"
+                    },
+                    {
+                      "label": "Onder",
+                      "value": "bottom"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "story",
+              "label": "Mijn verhaal",
+              "widget": "object",
+              "collapsed": true,
+              "fields": [
+                {
+                  "name": "title",
+                  "label": "Titel",
+                  "widget": "text",
+                  "hint": "Zet *sterretjes* rond woorden voor de schuine roze accenttekst. Een nieuwe regel geeft een regelafbreking."
+                },
+                {
+                  "name": "intro",
+                  "label": "Tekst",
+                  "widget": "text"
+                },
+                {
+                  "name": "timeline",
+                  "label": "Tijdlijn",
+                  "widget": "list",
+                  "allow_add": false,
+                  "allow_remove": false,
+                  "allow_reorder": false,
+                  "collapsed": true,
+                  "summary": "{{fields.period}}: {{fields.title}}",
+                  "fields": [
+                    {
+                      "name": "period",
+                      "label": "Jaar of periode",
+                      "widget": "string"
+                    },
+                    {
+                      "name": "title",
+                      "label": "Kop",
+                      "widget": "string"
+                    },
+                    {
+                      "name": "text",
+                      "label": "Tekst",
+                      "widget": "text"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "education",
+              "label": "Opleiding en certificaten",
+              "widget": "object",
+              "collapsed": true,
+              "fields": [
+                {
+                  "name": "title",
+                  "label": "Titel",
+                  "widget": "string",
+                  "hint": "Zet *sterretjes* rond woorden voor de schuine roze accenttekst. Een nieuwe regel geeft een regelafbreking."
+                },
+                {
+                  "name": "intro",
+                  "label": "Tekst",
+                  "widget": "text"
+                },
+                {
+                  "name": "items",
+                  "label": "Onderdelen",
+                  "widget": "list",
+                  "allow_add": false,
+                  "allow_remove": false,
+                  "allow_reorder": false,
+                  "collapsed": true,
+                  "summary": "{{fields.title}}",
+                  "fields": [
+                    {
+                      "name": "title",
+                      "label": "Kop",
+                      "widget": "string"
+                    },
+                    {
+                      "name": "text",
+                      "label": "Tekst",
+                      "widget": "text"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "values",
+              "label": "Zo werk ik",
+              "widget": "object",
+              "collapsed": true,
+              "fields": [
+                {
+                  "name": "title",
+                  "label": "Titel",
+                  "widget": "string",
+                  "hint": "Zet *sterretjes* rond woorden voor de schuine roze accenttekst. Een nieuwe regel geeft een regelafbreking."
+                },
+                {
+                  "name": "intro",
+                  "label": "Tekst",
+                  "widget": "text"
+                },
+                {
+                  "name": "items",
+                  "label": "Punten",
+                  "widget": "list",
+                  "allow_add": false,
+                  "allow_remove": false,
+                  "allow_reorder": false,
+                  "collapsed": true,
+                  "summary": "{{fields.title}}",
+                  "fields": [
+                    {
+                      "name": "title",
+                      "label": "Kop",
+                      "widget": "string"
+                    },
+                    {
+                      "name": "text",
+                      "label": "Tekst",
+                      "widget": "text"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "register",
+              "label": "NAIL register",
+              "widget": "object",
+              "collapsed": true,
+              "fields": [
+                {
+                  "name": "title",
+                  "label": "Titel",
+                  "widget": "string"
+                },
+                {
+                  "name": "intro",
+                  "label": "Inleiding",
+                  "widget": "text"
+                },
+                {
+                  "name": "points",
+                  "label": "Opsomming",
+                  "widget": "list",
+                  "allow_add": false,
+                  "allow_remove": false,
+                  "allow_reorder": false,
+                  "collapsed": true,
+                  "field": {
+                    "name": "point",
+                    "label": "Punt",
+                    "widget": "string"
+                  }
+                },
+                {
+                  "name": "you",
+                  "label": "Slottekst",
+                  "widget": "text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "contact",
+          "label": "Contact",
+          "file": "public/content/contact.json",
+          "fields": [
+            {
+              "name": "intro",
+              "label": "Tekst bovenaan",
+              "widget": "text",
+              "hint": "Telefoon, e-mail, adres en openingstijden staan vast in de website; vraag de ontwikkelaar om deze te wijzigen."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

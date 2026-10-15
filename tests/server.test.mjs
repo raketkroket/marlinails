@@ -9,6 +9,7 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import sharp from 'sharp';
 import { createSiteServer, securityHeaders } from '../server.mjs';
+import { contentFiles } from '../scripts/content.mjs';
 
 let server, origin;
 before(async () => {
@@ -94,7 +95,8 @@ test('Vercel builds only dist and applies current production security headers', 
   assert.equal(config.buildCommand, 'npm run build');
   assert.equal(config.outputDirectory, 'dist');
   assert.equal(config.installCommand, 'npm ci');
-  assert.equal(config.headers[0].source, '/(.*)');
+  assert.equal(config.headers[0].source, '/((?!admin/).*)');
+  assert.equal(config.headers[1].source, '/admin/(.*)');
   const headers = Object.fromEntries(config.headers[0].headers.map(({ key, value }) => [key, value]));
   assert.equal(headers['Cache-Control'], 'public, max-age=0, must-revalidate');
   for (const [name, value] of Object.entries(await securityHeaders({ https: true }))) {
@@ -112,7 +114,9 @@ test('production build and browser CSP hashes agree for Linux and Windows line e
       const root = path.join(directory, name);
       await mkdir(path.join(root, 'public'), { recursive: true });
       await mkdir(path.join(root, 'scripts'), { recursive: true });
-      for (const file of ['server.mjs', 'vercel.json', 'scripts/build.mjs', 'public/index.html']) {
+      await mkdir(path.join(root, 'public', 'content'), { recursive: true });
+      for (const file of ['server.mjs', 'vercel.json', 'scripts/build.mjs', 'scripts/content.mjs', 'public/index.html',
+        ...contentFiles.map(name => `public/content/${name}.json`)]) {
         const content = await readFile(new URL(`../${file}`, import.meta.url), 'utf8');
         await writeFile(path.join(root, file), content.replace(/\r\n?/g, '\n').replace(/\n/g, newline));
       }

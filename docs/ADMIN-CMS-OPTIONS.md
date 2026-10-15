@@ -1,8 +1,7 @@
-# Content editing for Marjon: options (not implemented, needs approval)
+# Content editing for Marjon: options (option A implemented)
 
-Status: **assessment only.** Nothing in this repository adds an admin page,
-login, external service or credential. The public site works on its own and
-will keep working whether or not one of these options is chosen.
+Status: **option A was approved and implemented** (October 2026); see the README,
+"Content editing (admin)", for setup. This document keeps the original comparison.
 
 ## Intended scope
 
@@ -12,9 +11,9 @@ Marjon edits **existing** content only:
 - change an existing paragraph, caption or price;
 - not: create pages, sections or layouts.
 
-All of this content already lives in one place, the `CONTENT` object at the
-top of `public/app.js`, so every option below edits that data (moved to a JSON
-file) and nothing else.
+All of this content now lives in `public/content/*.json` (originally the
+`CONTENT` object at the top of `public/app.js`); every option below edits that
+data and nothing else.
 
 ## Options
 
@@ -41,4 +40,4 @@ Before building it, please confirm:
 3. Permission to create a GitHub OAuth app for the site and store its secret in Vercel.
 4. Whether the Vercel project should move from Hobby to Pro (Vercel's Hobby plan is meant for non-commercial use; check this regardless of the CMS).
 
-Until then, option D remains in place.
+Option A is now in place; until the OAuth app and environment variables are set up, changes go through the developer (option D).
