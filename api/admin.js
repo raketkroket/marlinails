@@ -35,6 +35,27 @@ function authenticated(req, res, config) {
 }
 
 const actions = {
+  // Which part of the setup works, without revealing any secret. Limited to a few calls per minute.
+  async health(req, res) {
+    const config = adminConfig();
+    const storage = getStorage();
+    let redis = rateLimitReady() ? 'ok' : 'ontbreekt';
+    try {
+      const { count } = await recordFailure('marli:health', 60);
+      if (count > 6) throw new HttpError(429, 'rate_limited', 'Te vaak gecontroleerd. Probeer het over een minuut opnieuw.');
+    } catch (error) {
+      if (error instanceof HttpError) throw error;
+      redis = 'fout';
+    }
+    const hash = String(process.env.ADMIN_PASSWORD_HASH || '');
+    sendJson(res, 200, {
+      wachtwoord: !hash ? 'ontbreekt' : (config.passwordHash.startsWith('scrypt$') && hash.split('$').length === 6 && hash === hash.trim()) ? 'ok' : 'ongeldig (plak alleen de waarde die met scrypt$ begint)',
+      sessie: !config.secret ? 'ontbreekt' : config.secret.length >= 32 ? 'ok' : 'te kort',
+      redis,
+      opslag: storage ? { soort: storage.kind, ...(await storage.check()) } : 'ontbreekt (GITHUB_CONTENT_TOKEN)'
+    });
+  },
+
   async status(req, res) {
     const config = adminConfig();
     sendJson(res, 200, { ready: config.ready && Boolean(getStorage()) && rateLimitReady() });
@@ -171,6 +192,7 @@ const actions = {
 };
 
 const WRITE_ACTIONS = new Set(['login', 'logout', 'upload', 'save']);
+// health and status are GET and need no login.
 
 export default async function handler(req, res) {
   try {
@@ -185,6 +207,13 @@ export default async function handler(req, res) {
   } catch (error) {
     if (error instanceof HttpError) {
       sendJson(res, error.status, { error: error.code, message: error.message });
+    } else if (error.github) {
+      // GitHub refused: usually the token is wrong, expired, or may only read.
+      console.error('Admin storage error:', error.message);
+      const code = error.status === 401 ? 'GH401' : [403, 404].includes(error.status) ? 'GH403' : `GH${error.status || 0}`;
+      const reason = code === 'GH401' ? 'de sleutel voor de opslag is ongeldig of verlopen'
+        : code === 'GH403' ? 'de sleutel voor de opslag heeft geen toestemming om op te slaan' : 'de opslag reageert niet';
+      sendJson(res, 502, { error: 'storage', message: `Opslaan is niet gelukt: ${reason}. Neem contact op met uw websitebouwer. (code ${code})` });
     } else {
       console.error('Admin API error:', error);
       sendJson(res, 500, { error: 'server', message: 'Er ging iets mis bij het opslaan. Probeer het over een minuut opnieuw.' });

@@ -318,3 +318,28 @@ test('no secrets, passwords or tokens in anything sent to the browser', async ()
     assert.doesNotMatch(text, /scrypt\$|ADMIN_SESSION_SECRET|GITHUB_CONTENT_TOKEN|KV_REST_API_TOKEN|ghp_|github_pat_|Roze-Nagels/, file);
   }
 });
+
+test('health check and clear errors when the GitHub token may only read', async () => {
+  const github = await startMockGitHub({ root: site.root });
+  try {
+    Object.assign(process.env, { GITHUB_CONTENT_TOKEN: 'test-token', GITHUB_API_URL: github.api });
+    const health = await (await fetch(`${origin}/api/admin?action=health`)).json();
+    assert.deepEqual(health, { wachtwoord: 'ok', sessie: 'ok', redis: 'ok', opslag: { soort: 'github', read: 'ok', write: 'ok' } });
+    assert.doesNotMatch(JSON.stringify(health), /scrypt|test-token|xxxx/);
+    github.setReadOnly(true);
+    const readOnly = await (await fetch(`${origin}/api/admin?action=health`)).json();
+    assert.deepEqual(readOnly.opslag, { soort: 'github', read: 'ok', write: 'fout 403' });
+    const api = client(origin);
+    await login(api);
+    const { content, versions } = (await api.call('content')).data;
+    const res = await api.call('save', { method: 'POST', body: { content: { contact: { intro: 'Nieuw' } }, versions } });
+    assert.equal(res.status, 502);
+    assert.match(res.data.message, /geen toestemming om op te slaan.*\(code GH403\)/);
+    Object.assign(process.env, { GITHUB_CONTENT_TOKEN: 'wrong-token' });
+    const bad = await (await fetch(`${origin}/api/admin?action=health`)).json();
+    assert.deepEqual(bad.opslag, { soort: 'github', read: 'fout 401', write: 'fout 401' });
+    assert.ok(content);
+  } finally {
+    await github.close();
+  }
+});

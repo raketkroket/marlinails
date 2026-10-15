@@ -36,6 +36,7 @@ export async function startMockGitHub({ root, token = 'test-token', repo = 'rake
   let head = randomSha();
   commits.set(head, { tree: rootTree, parents: [] });
   const log = [];
+  let readOnly = false;
 
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://mock');
@@ -48,6 +49,7 @@ export async function startMockGitHub({ root, token = 'test-token', repo = 'rake
       res.end(raw ? data : JSON.stringify(data));
     };
     if (req.headers.authorization !== `Bearer ${token}`) return send(401, { message: 'Bad credentials' });
+    if (readOnly && req.method !== 'GET') return send(403, { message: 'Resource not accessible by personal access token' });
     const base = `/repos/${repo}`;
     if (!url.pathname.startsWith(base)) return send(404, { message: 'Not Found' });
     const route = url.pathname.slice(base.length);
@@ -110,6 +112,7 @@ export async function startMockGitHub({ root, token = 'test-token', repo = 'rake
   const api = `http://127.0.0.1:${server.address().port}`;
   return {
     api, log,
+    setReadOnly(value) { readOnly = value; },
     file(p) { const sha = trees.get(commits.get(head).tree).get(p); return sha ? blobs.get(sha) : null; },
     commits: () => [...commits.values()].filter(c => c.message),
     // Simulates someone else changing the repository (for conflict tests).

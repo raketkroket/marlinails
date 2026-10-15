@@ -50,6 +50,7 @@ function githubStorage({ token, repo, branch, api }) {
     if (!response.ok) {
       const error = new Error(`GitHub ${method} ${url.split('?')[0]}: HTTP ${response.status}`);
       error.status = response.status;
+      error.github = true;
       throw error;
     }
     return raw ? Buffer.from(await response.arrayBuffer()) : response.json();
@@ -63,6 +64,14 @@ function githubStorage({ token, repo, branch, api }) {
   }
   return {
     kind: 'github',
+    // Health check: can the token read the branch, and may it write? Creating this tiny
+    // blob does not change the repository (no commit), and it is the same blob every time.
+    async check() {
+      const result = { read: 'ok', write: 'ok' };
+      try { await gh('GET', `/git/ref/heads/${encodeURIComponent(branch)}`); } catch (error) { result.read = `fout ${error.status || 'netwerk'}`; }
+      try { await gh('POST', '/git/blobs', { content: 'marli-health', encoding: 'utf-8' }); } catch (error) { result.write = `fout ${error.status || 'netwerk'}`; }
+      return result;
+    },
     async snapshot() {
       const current = await head();
       const files = {};
@@ -112,6 +121,7 @@ function localStorage(root) {
   const file = relative => path.join(root, ...relative.split('/'));
   return {
     kind: 'local',
+    async check() { return { read: 'ok', write: 'ok' }; },
     async snapshot() {
       const files = {};
       for (const name of contentFiles) {
