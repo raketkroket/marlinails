@@ -191,7 +191,7 @@ test('original images and fonts load locally, with no third-party requests', asy
     if (resolution.responsive) assert.match(resolution.source, /-(640|1440)\.webp$/);
     else assert.ok(resolution.width >= 500);
   }
-  assert.equal(await page.locator('.gal button').count(), 4);
+  assert.equal(await page.locator('.gal button').count(), 6);
   const sources = await page.locator('.view.on img').evaluateAll(images => images.map(image => image.src));
   assert.equal(new Set(sources).size, sources.length, 'Homepage photographs must not repeat');
   assert.equal(await page.evaluate(() => document.fonts.check('18px "DM Sans"')), true);
@@ -275,6 +275,7 @@ test('small mobile menu and photo dialog remain usable in a short viewport', asy
 
 test('published prices, product details and contact links are preserved', async () => {
   const page = await newPage();
+  await page.clock.setFixedTime(new Date('2026-10-15T12:00:00+02:00'));
   await navigate(page, 'prijslijst');
   const expectedPrices = [
     ['50,00', '52,50'], ['60,00', '62,50'], ['65,00', '67,50'],
@@ -283,7 +284,7 @@ test('published prices, product details and contact links are preserved', async 
     ['35,00'], ['40,00'], ['50,00'], ['35,00'], ['37,50'], ['27,50']
   ];
   const values = await page.locator('.price-table tbody tr').evaluateAll(rows =>
-    rows.map(row => [...row.querySelectorAll('td')].map(td => td.innerText.trim().replace(/^Kort en medium:\s*/, '').replace(/^€ /, ''))));
+    rows.map(row => [...row.querySelectorAll('td')].map(td => td.innerText.trim().replace(/^Kort en medium:\s*/, '').replace(/^€\s/, ''))));
   assert.deepEqual(values, expectedPrices);
   await navigate(page, 'producten');
   assert.equal(await page.locator('#prods .pitems li').count(), 11);
@@ -325,7 +326,7 @@ test('gallery is keyboard accessible and reduced motion leaves content visible',
   await page.keyboard.press('Enter');
   assert.equal(await page.locator('#lb').evaluate(el => el.open), true);
   await page.keyboard.press('ArrowRight');
-  assert.match(await page.locator('#lbCap').innerText(), /2 van 4/);
+  assert.match(await page.locator('#lbCap').innerText(), /2 van 6/);
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#lb').evaluate(el => el.open), false);
   assert.equal(await page.locator('.reveal').first().evaluate(el => getComputedStyle(el).opacity), '1');
@@ -351,5 +352,115 @@ test('invalid routes recover to home without script errors', async () => {
     assert.equal(new URL(page.url()).hash, '#/');
   }
   assert.deepEqual(errors, []);
+  await page.close();
+});
+
+const priceValues = page => page.locator('.price-table tbody tr').evaluateAll(rows =>
+  rows.map(row => [...row.querySelectorAll('td')].map(td => td.innerText.trim()
+    .replace(/^Kort en medium:\s*/, '').replace(/^€\s/, ''))));
+const futurePrices = [
+  ['52,50', '55,00'], ['62,50', '65,00'], ['67,50', '70,00'],
+  ['70,00', '72,50'], ['82,50', '85,00'], ['17,50', '20,00'],
+  ['3,00'], ['Gratis'], ['10,00', '12,50'], ['17,50'],
+  ['37,50'], ['42,50'], ['52,50'], ['35,00'], ['37,50'], ['30,00']
+];
+const nbsp = text => text.replace(/€ /g, '€ ');
+
+test('price increase for hand treatments is announced but not applied before 1 January 2027', async () => {
+  const page = await newPage({ reducedMotion: 'reduce' });
+  // 31 December 2026, 23:30 in the Netherlands: the current prices still apply.
+  await page.clock.setFixedTime(new Date('2026-12-31T23:30:00+01:00'));
+  await navigate(page, 'home');
+  assert.deepEqual(await page.locator('.card .price').allInnerTexts(),
+    ['Vanaf € 35', 'Vanaf € 35', 'Vanaf € 50', 'Vanaf € 3 per nagel'].map(nbsp));
+  assert.match(await page.locator('#treatFoot').innerText(), /t\/m 31 december 2026.*1 januari 2027/);
+  await navigate(page, 'prijslijst');
+  assert.match(await page.locator('.price-change').innerText(),
+    /Per 1 januari 2027 worden de prijzen van de handbehandelingen met €\s2,50 verhoogd/);
+  assert.match(await page.locator('#periodStatus').innerText(), /1 september 2025 tot en met 31 december 2026/);
+  assert.equal(await page.locator('[data-period="now"]').getAttribute('aria-pressed'), 'true');
+  assert.equal((await priceValues(page))[0][0], '50,00');
+  await page.locator('[data-period="future"]').click();
+  assert.equal(await page.locator('[data-period="future"]').getAttribute('aria-pressed'), 'true');
+  assert.deepEqual(await priceValues(page), futurePrices);
+  assert.match(await page.locator('#periodStatus').innerText(), /vanaf 1 januari 2027/);
+  await page.locator('[data-period="now"]').click();
+  assert.equal((await priceValues(page))[0][0], '50,00');
+  const audit = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+  assert.deepEqual(audit.violations.map(v => v.id), []);
+  await page.close();
+});
+
+test('new prices apply automatically from 1 January 2027 (Dutch time)', async () => {
+  const page = await newPage({ reducedMotion: 'reduce' });
+  // 23:30 UTC on 31 December is already 00:30 on 1 January in Amsterdam.
+  await page.clock.setFixedTime(new Date('2026-12-31T23:30:00Z'));
+  await navigate(page, 'home');
+  assert.deepEqual(await page.locator('.card .price').allInnerTexts(),
+    ['Vanaf € 37,50', 'Vanaf € 35', 'Vanaf € 52,50', 'Vanaf € 3 per nagel'].map(nbsp));
+  assert.equal(await page.locator('#treatFoot').innerText(), 'Prijzen geldig vanaf 1 januari 2027.');
+  await navigate(page, 'prijslijst');
+  assert.equal(await page.locator('.price-change').count(), 0);
+  assert.deepEqual(await priceValues(page), futurePrices);
+  assert.match(await page.locator('.pnotes').innerText(), /gelden vanaf 1 januari 2027/);
+  assert.doesNotMatch(await page.locator('.view.on').innerText(), /1 september 2025/);
+  await page.close();
+});
+
+test('client corrections: 2020 story, education wording and evening appointments', async () => {
+  const page = await newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  await navigate(page, 'over');
+  const story = await page.locator('#tl').innerText();
+  assert.match(story, /In 2020 zat ik door de coronaperiode noodgedwongen drie maanden thuis\./);
+  assert.match(story, /vervolgopleidingen en specialistische nagelcertificaten/);
+  assert.match(await page.locator('#edu').innerText(), /Vervolgopleidingen en specialistische nagelcertificaten/);
+  const everything = await page.evaluate(() => document.documentElement.innerHTML);
+  assert.doesNotMatch(everything, /nevenopleiding|nevenactiviteit|burn-?out/i);
+  const note = 'Afwijkende tijden zijn in overleg mogelijk, bijvoorbeeld in de avond.';
+  for (const selector of ['.book [data-hours-note]', '.ct-side [data-hours-note]', '.ftr [data-hours-note]', '.mm-info [data-hours-note]']) {
+    assert.equal(await page.locator(selector).textContent(), note, selector);
+  }
+  assert.match(await page.locator('.strip').textContent(), /bijvoorbeeld in de avond, in overleg/);
+  // Evening appointments are not advertised as regular opening hours.
+  const data = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());
+  assert.deepEqual(data.openingHoursSpecification, [{ '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Wednesday', 'Thursday', 'Friday', 'Saturday'], opens: '10:00', closes: '18:00' }]);
+  assert.deepEqual(await page.locator('.ct-side [data-hours] dd').allTextContents(), Array(4).fill('10:00–18:00'));
+  await page.close();
+});
+
+test('metadata targets the final domain and each page sets its own title and description', async () => {
+  const page = await newPage();
+  await navigate(page, 'home');
+  assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'), 'https://www.marlinails.nl/');
+  assert.equal(await page.locator('meta[property="og:image"]').getAttribute('content'),
+    'https://www.marlinails.nl/assets/og-marli-nails.jpg');
+  for (const path of ['/assets/og-marli-nails.jpg', '/assets/favicon-32.png', '/assets/apple-touch-icon.png']) {
+    assert.equal((await page.request.get(origin + path)).status(), 200, path);
+  }
+  const seen = new Set();
+  for (const name of pages) {
+    await navigate(page, name);
+    const title = await page.title();
+    const description = await page.locator('meta[name="description"]').getAttribute('content');
+    assert.match(title, /Marli Nails/);
+    assert.ok(description.length > 80 && description.length < 200, `${name}: ${description.length}`);
+    seen.add(title + description);
+  }
+  assert.equal(seen.size, pages.length);
+  await page.close();
+});
+
+test('mobile gallery scrolls horizontally inside its row and opens every photo', async () => {
+  const page = await newPage({ viewport: { width: 375, height: 812 }, reducedMotion: 'reduce' });
+  await navigate(page, 'home');
+  assert.ok(await page.locator('#gal').evaluate(el => el.scrollWidth > el.clientWidth), 'gallery scrolls');
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'page does not');
+  await page.locator('.gal button').last().scrollIntoViewIfNeeded();
+  await page.locator('.gal button').last().click();
+  assert.match(await page.locator('#lbCap').innerText(), /6 van 6/);
+  await page.locator('#lbNext').click();
+  assert.match(await page.locator('#lbCap').innerText(), /1 van 6/);
+  await page.locator('#lbClose').click();
   await page.close();
 });

@@ -277,3 +277,107 @@ body{font-size:17px}
 @media (prefers-reduced-transparency:reduce){
   .hdr,.actionbar,.mmenu{background:#f8f4ee;backdrop-filter:none;-webkit-backdrop-filter:none}
 }
+
+/* =====================================================================
+   RELEASE 2026-10 — boutique polish: layered surfaces, treatment cards,
+   gallery, dated prices, story timeline and education.
+   ===================================================================== */
+:root{--surface:#fffaf4;--shadow-soft:0 1px 0 rgba(61,45,34,.05),0 22px 44px -32px rgba(61,45,34,.45);--shadow-lift:0 1px 0 rgba(61,45,34,.05),0 28px 56px -30px rgba(61,45,34,.55)}
+.btn-pink{transition:background .25s var(--ease),box-shadow .3s var(--ease),transform .25s var(--ease)}
+.btn-pink:hover{box-shadow:0 10px 24px -12px rgba(173,45,103,.65)}
+.welkom-img .ph,.ab-grid .ph{box-shadow:var(--shadow-lift)}
+.hours-note{margin:12px 0 0;font-size:15px;line-height:1.55;color:var(--muted);max-width:34ch}
+.mm-info .hours-note{font-size:16px;margin:0}
+.ftr .hours-note,.ftr-note[data-hours-note]{color:#f6eee5;max-width:30ch}
+.ct-side .hours-note{margin-top:12px}
+
+/* Behandelingen: kaarten met foto vanaf tablet */
+@media (min-width:860px){
+  .treat-intro{grid-column:1/-1;display:grid;grid-template-columns:1.1fr 1fr;gap:16px 64px;align-items:end;padding:0;margin-bottom:clamp(36px,4vw,56px)}
+  .treat-intro h2{grid-row:1/3;margin:0}
+  .treat-intro h2 br{display:none}
+  .treat-intro p{margin:0}
+  .treat-intro .tlink{justify-self:start}
+  .cards{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;border:0}
+  .cards li{border:0;min-width:0}
+  .card{display:flex;flex-direction:column;align-items:stretch;height:100%;gap:0;padding:12px;background:var(--surface);border-radius:24px;box-shadow:var(--shadow-soft);transition:transform .45s var(--ease),box-shadow .45s var(--ease)}
+  .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lift)}
+  .card .ph{aspect-ratio:5/4;border-radius:16px;flex:none}
+  .card-b{display:flex;flex-direction:column;flex:1;padding:22px 14px 8px}
+  .treat-number{padding:0;margin-bottom:8px;font-size:15px}
+  .card h3{font-size:clamp(1.6rem,2.2vw,2rem);margin:0 0 10px}
+  .card-f{margin-top:auto;padding-top:18px;justify-content:space-between;align-items:center}
+  .card-f .go{min-height:44px}
+}
+@media (min-width:1180px){
+  .cards{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .card .ph{aspect-ratio:4/5}
+}
+
+/* Galerij: drie kolommen, middelste kolom licht verschoven */
+.gal figure:nth-child(n) .ph{aspect-ratio:4/5;border-radius:20px}
+.gal button{border-radius:20px}
+.gal button .ph{transition:box-shadow .45s var(--ease)}
+.gal button:hover .ph{box-shadow:var(--shadow-lift)}
+.gal figcaption>span:last-child:not(.photo-index){display:inline;margin-left:0;color:var(--plum);font-size:16px}
+@media (min-width:860px){
+  .gal{grid-template-columns:repeat(3,minmax(0,1fr));gap:48px 32px}
+  .gal figure:nth-child(n){grid-column:auto;padding-top:0}
+  .gal figure:nth-child(3n+2){margin-top:64px}
+  .gal figure:nth-child(3n+2):nth-last-child(-n+2){margin-bottom:-64px}
+}
+@media (max-width:599px){
+  .gal{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:78%;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;margin:0 calc(var(--pad) * -1);padding:4px var(--pad) 8px;scroll-padding-inline:var(--pad);scrollbar-width:none}
+  .gal::-webkit-scrollbar{display:none}
+  .gal figure{scroll-snap-align:start}
+  .gal figure:nth-child(n) .ph{aspect-ratio:4/5}
+}
+
+/* Prijslijst: aankondiging en wisselknop voor de nieuwe tarieven */
+.price-change{display:grid;gap:22px;padding:clamp(22px,3vw,32px);background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow-soft)}
+.price-change .kicker{margin-bottom:10px}
+.price-change h2{font-size:clamp(1.6rem,3vw,2.2rem);margin-bottom:10px}
+.price-change p{margin:0;color:var(--text)}
+.period-switch{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px;background:var(--blush);border-radius:20px}
+.period-switch button{display:grid;gap:2px;align-content:center;min-height:60px;padding:10px 12px;border:0;border-radius:15px;background:transparent;color:var(--plum);font:600 16px/1.3 var(--sans);cursor:pointer;transition:background .25s,box-shadow .25s,color .25s}
+.period-switch button small{font-size:15px;font-weight:400;color:var(--muted)}
+.period-switch button:hover{background:#f8f1e8}
+.period-switch button[aria-pressed="true"]{background:#fff;color:var(--pink-ink);box-shadow:0 8px 20px -12px rgba(61,45,34,.45)}
+.period-status{margin:0;font-weight:600;color:var(--plum)}
+@media (min-width:1320px){.price-change{grid-template-columns:1.25fr 1fr;align-items:center;gap:36px}}
+
+/* Producten: gelaagde kaarten */
+.pcat{padding:clamp(20px,2.4vw,30px);background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow-soft)}
+.pcat .pitems li:last-child{border-bottom:0;padding-bottom:0}
+@media (min-width:1024px){.prod-grid{align-items:start}}
+
+/* Over: verhaal met tijdlijn */
+.story-grid{display:grid;gap:40px}
+.story-head h2{font-size:clamp(2.4rem,4.6vw,3.8rem);margin-bottom:20px}
+.story-head h2 em{color:var(--pink-ink)}
+.story-head p{color:var(--muted)}
+@media (min-width:1024px){.story-grid{grid-template-columns:5fr 7fr;gap:80px;align-items:start}.story-head{position:sticky;top:130px}}
+.tl{border:0;display:grid}
+.tl li{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:0 0 36px 32px;border:0}
+.tl li::before{content:"";position:absolute;left:5px;top:16px;bottom:-4px;width:1px;background:color-mix(in srgb,var(--pink-ink) 30%,transparent)}
+.tl li:last-child{padding-bottom:0}
+.tl li:last-child::before{display:none}
+.tl li::after{content:"";position:absolute;left:0;top:6px;width:11px;height:11px;border-radius:50%;background:var(--white);border:2px solid var(--pink-ink)}
+.tl li:last-child::after{background:var(--pink-ink)}
+.tl .yr{font-size:clamp(1.5rem,2.6vw,2rem);line-height:1.1;color:var(--pink-ink)}
+.tl h3{margin:2px 0 6px}
+@media (min-width:860px){
+  .tl li{grid-template-columns:150px minmax(0,1fr);gap:4px 40px;padding:0 0 44px}
+  .tl li::before{left:170px;top:18px;bottom:-6px}
+  .tl li::after{left:165px;top:8px}
+}
+.edu{list-style:none;margin:0;padding:0;display:grid;gap:var(--gap)}
+.edu li{padding:clamp(22px,2.6vw,32px);background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow-soft)}
+.edu-n{display:block;margin-bottom:18px;font:italic 400 1.6rem/1 var(--serif);color:var(--pink-ink)}
+.edu h3{font:400 clamp(1.4rem,2vw,1.6rem)/1.2 var(--serif);color:var(--plum);margin-bottom:10px}
+.edu p{margin:0;color:var(--muted)}
+@media (min-width:860px){.edu{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.vals-sec .vals li{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-soft)}
+@media (max-width:859px){.story-head h2{font-size:clamp(2.4rem,8vw,3.4rem)}.edu-n{margin-bottom:12px}}
+@media (min-width:1180px){.card h3{font-size:clamp(1.5rem,1.8vw,1.9rem)}}
+.book .hours-note{color:var(--plum)}

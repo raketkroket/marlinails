@@ -132,7 +132,7 @@ test('production build and browser CSP hashes agree for Linux and Windows line e
 test('responsive photographs meet resolution and payload budgets with no EXIF metadata', async () => {
   const directory = new URL('../public/assets/', import.meta.url);
   const files = (await readdir(directory)).filter(name => name.endsWith('.webp'));
-  assert.equal(files.length, 16);
+  assert.equal(files.length, 22);
   for (const name of files) {
     const file = new URL(name, directory);
     const metadata = await sharp(await readFile(file)).metadata();

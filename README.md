@@ -93,11 +93,68 @@ Forms cannot POST: the contact form only opens an encoded `mailto:` draft.
 It does not send, save or confirm an appointment; customers must send the email
 themselves, or call. No new booking system has been invented.
 
+## Prices and the 1 January 2027 increase
+
+Treatment prices live in `CONTENT.prices` in `public/app.js` as numbers
+(`[kort, medium]` or a single amount). Rows marked `hand: true` are hand
+treatments; Marjon asked for these to rise by €2.50 per 1 January 2027.
+`CONTENT.priceChange` holds the date, label and amount.
+
+- Until 31 December 2026 (Dutch time, `Europe/Amsterdam`) the current prices
+  are shown. The price list announces the change and lets visitors switch to
+  view the new prices; the homepage notes the date.
+- From 1 January 2027 the new prices apply automatically on the price list
+  and the homepage "Vanaf" amounts, and the announcement disappears.
+- Raised: natural nail treatments, sets met verlenging, Seal & Protect,
+  manicure Brons/Zilver/Goud and E-manicure voor heren.
+- Not raised: teennagels, Seduction products, the free repair.
+- **Awaiting Marjon's confirmation, currently not raised:** nail art
+  (€3,00 per nagel), breuk per nagel (€10,00/€12,50) and verwijderen gelpolish
+  (€17,50). To include one, add `hand: true` to its row.
+- After the change has passed, the base prices can be updated and
+  `priceChange` moved to the next change (or the announcement removed).
+
+Browser tests fix the clock to verify both sides of the switch.
+
+## Replacing photos
+
+1. Put the original in `public/` (or `public/assets/`).
+2. Add its file name in `scripts/optimize-images.mjs` if it is not a
+   `2026XXXX_XXXXXX.jpg` file, then run `npm run images`.
+3. Change the name, `alt` text and caption in `CONTENT` (`images`, `services`
+   or `gallery`). `focus` controls the crop (CSS `object-position`).
+
+The profile photo is `CONTENT.images.about` (currently `20211113_122901`).
+
+## Domain: marlinails.vercel.app → www.marlinails.nl
+
+Canonical URL, Open Graph URL/image and structured data already point at the
+intended final domain `https://www.marlinails.nl/`; the custom domain is **not**
+connected yet and the current WordPress site there has not been touched.
+`vercel.json` redirects the old WordPress paths (`/prijslijst/`,
+`/producten-seduction/`, `/over-marli-nails/`, `/contact/`) to the new pages,
+so links keep working after the move. The Open Graph image only resolves once
+the domain points here. To migrate (with Marjon's approval):
+
+1. Find out who manages the marlinails.nl DNS and the current WordPress hosting.
+2. **Keep the existing MX/email records** so info@marlinails.nl keeps working.
+3. In Vercel → Project → Domains add `www.marlinails.nl` and `marlinails.nl`
+   (redirect apex to www) and set the DNS records Vercel shows.
+4. Check the live site, HTTPS, redirects and headers, then submit
+   `https://www.marlinails.nl/` in Google Search Console.
+5. Cancel the old WordPress hosting only after everything is verified.
+
+## Content editing (admin)
+
+Not implemented. See `docs/ADMIN-CMS-OPTIONS.md` for options, costs and the
+approvals needed.
+
 ## Content and assets
 
 Prices and Seduction product details were checked against
 [the published price list](https://www.marlinails.nl/prijslijst/) and
-[Seduction products](https://www.marlinails.nl/producten-seduction/) on 9 October 2026.
+[Seduction products](https://www.marlinails.nl/producten-seduction/) on 9 October 2026
+(prices rechecked on 15 October 2026).
 The published treatment prices are effective from 1 September 2025.
 “Pedicure” is explicitly described as cosmetic teennail care, not medical foot care.
 Original salon images come from the business website and the eight supplied 2026 photos.

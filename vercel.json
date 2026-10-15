@@ -4,14 +4,21 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm ci",
+  "redirects": [
+    { "source": "/prijslijst", "destination": "/#/prijslijst", "permanent": true },
+    { "source": "/prijslijst/", "destination": "/#/prijslijst", "permanent": true },
+    { "source": "/producten-seduction", "destination": "/#/producten", "permanent": true },
+    { "source": "/producten-seduction/", "destination": "/#/producten", "permanent": true },
+    { "source": "/over-marli-nails", "destination": "/#/over", "permanent": true },
+    { "source": "/over-marli-nails/", "destination": "/#/over", "permanent": true },
+    { "source": "/contact", "destination": "/#/contact", "permanent": true },
+    { "source": "/contact/", "destination": "/#/contact", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'none'; script-src 'self' 'sha256-EwkD4GbVJnODSdkd6X5FxUP7EwvcYcVuKa8KJ3iG88A='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
-        },
+        { "key": "Content-Security-Policy", "value": "default-src 'none'; script-src 'self' 'sha256-qwuNGuVPjBSMJcuuMlq4GJpZ2eqXqep+uQCSfXq7XsU='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "Referrer-Policy", "value": "no-referrer" },
