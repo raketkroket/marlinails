@@ -1,9 +1,10 @@
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { contentScript, readContent } from './scripts/content.mjs';
+import { previewHtml } from './scripts/preview.mjs';
 
 export const publicRoot = fileURLToPath(new URL('./public/', import.meta.url));
 const types = {
@@ -14,23 +15,20 @@ const types = {
   '.jpg': 'image/jpeg',
   '.webp': 'image/webp',
   '.woff2': 'font/woff2',
-  '.ttf': 'font/ttf',
-  '.yml': 'text/yaml; charset=utf-8'
+  '.ttf': 'font/ttf'
 };
 
-// /admin/ only (Decap CMS): its pinned, integrity-checked bundle from unpkg, the GitHub API
-// for reading/saving content, and inline styles that the CMS interface injects. Decap's
-// config validator (Ajv) compiles schemas at runtime, so this page needs 'unsafe-eval';
-// the public site keeps its strict policy.
-export const adminContentSecurityPolicy = "default-src 'none'; script-src 'self' 'unsafe-eval' https://unpkg.com; " +
-  "style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://avatars.githubusercontent.com; " +
-  "font-src 'self' data:; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'none'; " +
-  "form-action 'none'; frame-ancestors 'none'";
+// /admin/ only: the website editor. Same-origin scripts and API calls only; it may frame
+// its own page preview (/admin/preview.html) and show photo previews (data:/blob:).
+export const adminContentSecurityPolicy = "default-src 'none'; script-src 'self'; style-src 'self'; " +
+  "img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-src 'self'; object-src 'none'; " +
+  "base-uri 'none'; form-action 'none'; frame-ancestors 'self'";
 
 export async function adminHeaders({ https = false } = {}) {
   return {
     ...(await securityHeaders({ https })),
     'Content-Security-Policy': adminContentSecurityPolicy,
+    'X-Frame-Options': 'SAMEORIGIN',
     'X-Robots-Tag': 'noindex, nofollow'
   };
 }
@@ -51,6 +49,7 @@ export async function securityHeaders({ https = false } = {}) {
 }
 
 export async function createSiteServer() {
+  const dataRoot = process.env.ADMIN_LOCAL_ROOT ? path.join(process.env.ADMIN_LOCAL_ROOT, 'public') : publicRoot.replace(/[\\/]$/, '');
   const headers = await securityHeaders();
   const admin = await adminHeaders();
   return http.createServer(async (req, res) => {
@@ -60,6 +59,12 @@ export async function createSiteServer() {
       res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' });
       res.end(req.method === 'HEAD' ? undefined : text);
     };
+    if ((req.url || '').split('?')[0] === '/api/admin') {
+      // Same handler as the Vercel function api/admin.js.
+      const { default: admin } = await import('./api/admin.js');
+      await admin(req, res);
+      return;
+    }
     if (!['GET', 'HEAD'].includes(req.method)) {
       res.setHeader('Allow', 'GET, HEAD');
       reply(405, 'Method not allowed');
@@ -77,10 +82,17 @@ export async function createSiteServer() {
       reply(400, 'Invalid request path');
       return;
     }
+    if (pathname === '/admin/preview.html') {
+      // The real homepage, fed with the editor's unsaved draft (see scripts/preview.mjs).
+      const html = previewHtml(await readFile(path.join(publicRoot, 'index.html'), 'utf8'));
+      res.writeHead(200, { 'Content-Type': types['.html'], 'Cache-Control': 'no-cache' });
+      res.end(req.method === 'HEAD' ? undefined : html);
+      return;
+    }
     if (pathname === '/content.js') {
       // Generated from public/content/*.json, as in the production build.
       try {
-        const script = contentScript(await readContent(new URL('./public/', import.meta.url)));
+        const script = contentScript(await readContent(pathToFileURL(`${dataRoot}${path.sep}`)));
         res.writeHead(200, { 'Content-Type': types['.js'], 'Content-Length': Buffer.byteLength(script), 'Cache-Control': 'no-cache' });
         res.end(req.method === 'HEAD' ? undefined : script);
       } catch (error) {
@@ -89,8 +101,10 @@ export async function createSiteServer() {
       }
       return;
     }
-    const file = path.resolve(publicRoot, `.${pathname.endsWith('/') ? `${pathname}index.html` : pathname}`);
-    const relative = path.relative(publicRoot, file);
+    // Photos saved by the local editor live in ADMIN_LOCAL_ROOT when that is set (tests).
+    const base = pathname.startsWith('/assets/uploads/') ? dataRoot : publicRoot;
+    const file = path.resolve(base, `.${pathname.endsWith('/') ? `${pathname}index.html` : pathname}`);
+    const relative = path.relative(base, file);
     const extension = path.extname(file);
     if (relative.startsWith('..') || path.isAbsolute(relative) || !types[extension]) {
       reply(404, 'Not found');

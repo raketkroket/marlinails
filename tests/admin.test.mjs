@@ -1,155 +1,320 @@
-import { after, test } from 'node:test';
+import { after, before, beforeEach, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
-import { fileURLToPath } from 'node:url';
+import { readFile, readdir } from 'node:fs/promises';
+import path from 'node:path';
 import sharp from 'sharp';
-import { contentFiles } from '../scripts/content.mjs';
-import auth from '../api/auth.js';
-import callback from '../api/callback.js';
+import { createSiteServer } from '../server.mjs';
+import { createSession, hashPassword, readSession, sessionCookie, verifyPassword } from '../api/_lib/auth.js';
+import { resetMemoryStore } from '../api/_lib/ratelimit.js';
+import { validateFile } from '../api/_lib/validate.js';
+import { choicesOf, describe as describePrice, encode, rollOver } from '../public/admin/prices.js';
+import { previewHtml } from '../scripts/preview.mjs';
+import { client, makeSite } from './helpers/site.mjs';
+import { startMockGitHub, startMockRedis } from './helpers/mocks.mjs';
 
-const root = new URL('../', import.meta.url);
-const read = async file => readFile(new URL(file, root), 'utf8');
-const config = JSON.parse((await read('public/admin/config.yml')).replace(/^#.*\n/gm, ''));
-
-// Every content key must be an admin field and vice versa, or saving via /admin would drop data.
-function compare(fields, value, path, problems) {
-  const names = fields.map(f => f.name);
-  for (const key of Object.keys(value)) if (!names.includes(key)) problems.push(`${path}.${key}: not editable`);
-  for (const field of fields) {
-    const data = value[field.name];
-    if (!(field.name in value)) { problems.push(`${path}.${field.name}: missing in content`); continue; }
-    if (field.widget === 'object') compare(field.fields, data, `${path}.${field.name}`, problems);
-    if (field.widget === 'list') {
-      assert.ok(Array.isArray(data), `${path}.${field.name} is a list`);
-      assert.equal(field.allow_add, false, `${path}.${field.name}: no new items`);
-      assert.equal(field.allow_remove, false, `${path}.${field.name}: no removed items`);
-      data.forEach((item, i) => field.fields
-        ? compare(field.fields, item, `${path}.${field.name}[${i}]`, problems)
-        : assert.equal(typeof item, 'string'));
-    }
-  }
-}
-
-test('admin fields match the content files exactly and only allow editing existing items', async () => {
-  const files = config.collections[0].files;
-  assert.deepEqual(files.map(f => f.name), contentFiles);
-  assert.equal(config.collections[0].create, undefined, 'no new pages');
-  for (const file of files) {
-    assert.equal(file.file, `public/content/${file.name}.json`);
-    const problems = [];
-    compare(file.fields, JSON.parse(await read(file.file)), file.name, problems);
-    assert.deepEqual(problems, [], file.name);
-  }
-  assert.equal(config.media_folder, 'public/assets/uploads');
-  assert.equal(config.public_folder, '/assets/uploads');
-});
-
-test('admin page pins the CMS bundle with subresource integrity and keeps secrets server-side', async () => {
-  const html = await read('public/admin/index.html');
-  assert.match(html, /src="https:\/\/unpkg\.com\/decap-cms@\d+\.\d+\.\d+\/dist\/decap-cms\.js" integrity="sha384-[A-Za-z0-9+/=]+" crossorigin="anonymous"/);
-  assert.match(html, /<meta name="robots" content="noindex, nofollow">/);
-  for (const file of ['public/admin/index.html', 'public/admin/admin.js', 'public/admin/before.js', 'public/admin/oauth-callback.js', 'public/admin/config.yml']) {
-    assert.doesNotMatch(await read(file), /client_secret|CLIENT_SECRET|ghp_|gho_/, file);
-  }
-});
-
+const PASSWORD = 'Roze-Nagels-2026!';
+let site, server, origin, passwordHash;
 const env = { ...process.env };
-after(() => { process.env = env; });
-function call(handler, url, headers = {}) {
-  return new Promise(resolve => {
-    const res = { statusCode: 200, headers: {}, setHeader(k, v) { this.headers[k.toLowerCase()] = v; },
-      end(body = '') { resolve({ status: this.statusCode, headers: this.headers, body: String(body) }); } };
-    handler({ url, headers: { host: 'marli.example', ...headers } }, res);
-  });
+
+async function startServer() {
+  server = await createSiteServer();
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  origin = `http://127.0.0.1:${server.address().port}`;
 }
+const stopServer = () => new Promise(resolve => server.close(resolve));
 
-test('login start refuses to run without OAuth settings and otherwise redirects to GitHub with state', async () => {
-  delete process.env.GITHUB_OAUTH_CLIENT_ID; delete process.env.GITHUB_OAUTH_CLIENT_SECRET;
-  assert.equal((await call(auth, '/api/auth?provider=github')).status, 503);
-  Object.assign(process.env, { GITHUB_OAUTH_CLIENT_ID: 'client-id', GITHUB_OAUTH_CLIENT_SECRET: 'client-secret' });
-  assert.equal((await call(auth, '/api/auth?provider=gitlab')).status, 400);
-  assert.equal((await call(auth, '/api/auth?provider=github&scope=admin:org')).status, 400);
-  const res = await call(auth, '/api/auth?provider=github&scope=public_repo');
-  assert.equal(res.status, 302);
-  const location = new URL(res.headers.location);
-  assert.equal(location.origin + location.pathname, 'https://github.com/login/oauth/authorize');
-  assert.equal(location.searchParams.get('client_id'), 'client-id');
-  assert.equal(location.searchParams.get('redirect_uri'), 'https://marli.example/api/callback');
-  assert.equal(location.searchParams.get('scope'), 'public_repo');
-  const state = location.searchParams.get('state');
-  assert.match(state, /^[0-9a-f]{48}$/);
-  assert.equal(res.headers['set-cookie'], `marli_oauth_state=${state}; Path=/api; HttpOnly; Secure; SameSite=Lax; Max-Age=600`);
-  assert.doesNotMatch(res.headers.location, /client-secret/);
+before(async () => {
+  passwordHash = await hashPassword(PASSWORD);
+  site = await makeSite();
+});
+beforeEach(async () => {
+  process.env = { ...env, ADMIN_PASSWORD_HASH: passwordHash, ADMIN_SESSION_SECRET: 'x'.repeat(48), ADMIN_LOCAL_ROOT: site.root };
+  delete process.env.VERCEL;
+  delete process.env.GITHUB_CONTENT_TOKEN;
+  resetMemoryStore();
+  if (server) await stopServer();
+  await startServer();
+});
+after(async () => {
+  process.env = env;
+  await stopServer();
+  await site.remove();
 });
 
-test('login callback checks state, exchanges the code and hands the token only to the same origin', async () => {
-  Object.assign(process.env, { GITHUB_OAUTH_CLIENT_ID: 'client-id', GITHUB_OAUTH_CLIENT_SECRET: 'client-secret' });
-  const realFetch = globalThis.fetch;
-  const requests = [];
-  globalThis.fetch = async (url, options) => {
-    requests.push({ url, body: JSON.parse(options.body) });
-    return new Response(JSON.stringify({ access_token: 'token-</script><b>' }), { status: 200 });
-  };
+const login = async (api, password = PASSWORD) => api.call('login', { method: 'POST', body: { username: 'marjon123', password } });
+const read = async name => JSON.parse(await readFile(path.join(site.root, 'public', 'content', `${name}.json`), 'utf8'));
+
+test('passwords are stored as scrypt hashes and checked in constant time', async () => {
+  assert.match(passwordHash, /^scrypt\$32768\$8\$1\$[A-Za-z0-9+/=]+\$[A-Za-z0-9+/=]+$/);
+  assert.doesNotMatch(passwordHash, /Roze-Nagels/);
+  assert.equal(await verifyPassword(PASSWORD, passwordHash), true);
+  assert.equal(await verifyPassword('roze-nagels-2026!', passwordHash), false);
+  assert.equal(await verifyPassword(PASSWORD, 'plaintext'), false);
+  assert.notEqual(await hashPassword(PASSWORD), passwordHash, 'salted');
+});
+
+test('sessions are signed, expire when idle or old, and end when the password changes', () => {
+  const config = { username: 'marjon123', passwordHash, secret: 's'.repeat(40), ready: true };
+  const req = { headers: {} };
+  const now = Date.parse('2026-10-15T12:00:00Z');
+  const cookie = sessionCookie(req, config, createSession(config, now)).split(';')[0];
+  const withCookie = value => ({ headers: { cookie: value } });
+  assert.ok(readSession(withCookie(cookie), config, now + 1000));
+  assert.equal(readSession(withCookie(cookie), config, now + 25 * 3600 * 1000), null, 'idle timeout');
+  assert.equal(readSession(withCookie(cookie.replace(/.$/, c => (c === 'A' ? 'B' : 'A'))), config, now), null, 'tampered');
+  assert.equal(readSession(withCookie(cookie), { ...config, passwordHash: 'scrypt$other' }, now), null, 'new password');
+  const old = createSession(config, now);
+  old.seen = Math.floor((now + 8 * 24 * 3600 * 1000) / 1000) - 10;
+  assert.equal(readSession(withCookie(sessionCookie(req, config, old).split(';')[0]), config, now + 8 * 24 * 3600 * 1000), null, 'absolute limit');
+});
+
+test('login: clear Dutch errors, secure cookie, CSRF token, logout', async () => {
+  const api = client(origin);
+  assert.deepEqual((await api.call('session')).data, { authenticated: false });
+  const wrong = await login(api, 'fout');
+  assert.equal(wrong.status, 401);
+  assert.equal(wrong.data.message, 'Gebruikersnaam of wachtwoord klopt niet.');
+  const ok = await login(api);
+  assert.equal(ok.status, 200);
+  const cookie = ok.headers.getSetCookie()[0];
+  assert.match(cookie, /^marli_admin=[^;]+; Path=\/; HttpOnly; SameSite=Strict; Max-Age=86400$/);
+  assert.match(ok.data.csrf, /^[A-Za-z0-9_-]{32}$/);
+  assert.doesNotMatch(JSON.stringify(ok.data), /scrypt|secret/i);
+  assert.equal((await api.call('session')).data.username, 'marjon123');
+  assert.equal((await api.call('logout', { method: 'POST' })).status, 200);
+  assert.deepEqual((await api.call('session')).data, { authenticated: false });
+  assert.equal((await api.call('content')).status, 401);
+});
+
+test('login is rate limited per address, even with the right password', async () => {
+  const api = client(origin);
+  for (let i = 0; i < 5; i++) assert.equal((await login(api, `fout-${i}`)).status, 401);
+  const blocked = await login(api);
+  assert.equal(blocked.status, 429);
+  assert.match(blocked.data.message, /^Te veel inlogpogingen\. Probeer het over 15 minuten opnieuw\.$/);
+});
+
+test('on Vercel, login limits use Redis and the admin refuses to run without it', async () => {
+  const redis = await startMockRedis();
   try {
-    const missing = await call(callback, '/api/callback?code=abc&state=one');
-    assert.equal(missing.status, 400);
-    const wrong = await call(callback, '/api/callback?code=abc&state=one', { cookie: 'marli_oauth_state=two' });
-    assert.equal(wrong.status, 400);
-    assert.equal(requests.length, 0, 'no token exchange without a valid state');
-    const ok = await call(callback, '/api/callback?code=abc&state=one', { cookie: 'other=1; marli_oauth_state=one' });
-    assert.equal(ok.status, 200);
-    assert.equal(ok.headers['cache-control'], 'no-store');
-    assert.match(ok.headers['set-cookie'], /marli_oauth_state=; .*Max-Age=0/);
-    assert.deepEqual(requests[0], { url: 'https://github.com/login/oauth/access_token',
-      body: { client_id: 'client-id', client_secret: 'client-secret', code: 'abc', redirect_uri: 'https://marli.example/api/callback' } });
-    // Only a JSON data block and the same-origin handshake script: no inline code, no HTML injection.
-    assert.match(ok.body, /<script type="application\/json" id="oauth-result">.*token-\\u003c\/script>\\u003cb>.*<\/script><script src="\/admin\/oauth-callback.js"><\/script>/);
-    assert.doesNotMatch(ok.body, /client-secret/);
-    globalThis.fetch = async () => new Response(JSON.stringify({ error: 'bad_verification_code' }), { status: 200 });
-    const failed = await call(callback, '/api/callback?code=abc&state=one', { cookie: 'marli_oauth_state=one' });
-    assert.equal(failed.status, 502);
-    assert.match(failed.body, /"status":"error"/);
+    process.env.VERCEL = '1';
+    process.env.GITHUB_CONTENT_TOKEN = 'unused';
+    const api = client(origin);
+    const missing = await login(api);
+    assert.equal(missing.status, 503);
+    assert.match(missing.data.message, /nog niet volledig ingesteld/);
+    Object.assign(process.env, { KV_REST_API_URL: redis.url, KV_REST_API_TOKEN: redis.token });
+    for (let i = 0; i < 5; i++) assert.equal((await login(api, 'fout')).status, 401);
+    assert.equal((await login(api)).status, 429);
+    assert.ok(redis.commands.some(([cmd, key]) => cmd === 'INCR' && key.startsWith('marli:login:ip:')));
+    assert.ok(redis.commands.some(([cmd, , seconds, mode]) => cmd === 'EXPIRE' && seconds === 900 && mode === 'NX'));
   } finally {
-    globalThis.fetch = realFetch;
+    await redis.close();
   }
-  const script = await read('public/admin/oauth-callback.js');
-  assert.match(script, /event\.origin !== window\.location\.origin/);
-  assert.match(script, /opener\.postMessage\(message, window\.location\.origin\)/);
 });
 
-test('photos uploaded via /admin are deployed only as resized WebP without metadata', async () => {
-  const dir = new URL('../.test-build/', import.meta.url);
-  await rm(dir, { recursive: true, force: true });
+test('every admin action needs a session; every write also needs the CSRF token and same origin', async () => {
+  const anonymous = client(origin);
+  for (const [action, method] of [['content', 'GET'], ['media', 'GET'], ['save', 'POST'], ['upload', 'POST']]) {
+    const res = await anonymous.call(action, { method, body: method === 'POST' ? {} : undefined, query: action === 'media' ? '&src=/assets/uploads/x-640.webp' : '' });
+    assert.equal(res.status, 401, action);
+  }
+  const api = client(origin);
+  await login(api);
+  const content = (await api.call('content')).data;
+  const body = { content: { contact: { intro: 'Nieuw' } }, versions: content.versions };
+  const token = api.csrf;
+  api.setCsrf('');
+  assert.equal((await api.call('save', { method: 'POST', body })).status, 403, 'missing CSRF token');
+  api.setCsrf(token);
+  assert.equal((await api.call('save', { method: 'POST', body, headers: { origin: 'https://evil.example' } })).status, 403, 'cross-site');
+  assert.equal((await api.call('save', { method: 'GET' })).status, 405);
+  assert.equal((await api.call('unknown')).status, 404);
+  assert.equal((await read('contact')).intro, content.content.contact.intro, 'nothing was written');
+});
+
+test('saving validates content: same structure only, safe text, valid prices and photos', async () => {
+  const api = client(origin);
+  await login(api);
+  const { content, versions } = (await api.call('content')).data;
+  const save = changes => api.call('save', { method: 'POST', body: { content: changes, versions } });
+  const home = structuredClone(content.home);
+  home.gallery.photos.push(home.gallery.photos[0]);
+  assert.match((await save({ home })).data.message, /toevoegen of verwijderen/);
+  const extra = structuredClone(content.contact);
+  extra.script = 'x';
+  assert.equal((await save({ contact: extra })).status, 400);
+  const prices = structuredClone(content.prijzen);
+  prices.groups[0].rows[0].price = 12.345;
+  assert.match((await save({ prijzen: prices })).data.message, /twee cijfers/);
+  prices.groups[0].rows[0].price = -1;
+  assert.equal((await save({ prijzen: prices })).status, 400);
+  const photo = structuredClone(content.home);
+  photo.gallery.photos[0].src = 'https://evil.example/x.jpg';
+  assert.match((await save({ home: photo })).data.message, /Ongeldige foto/);
+  photo.gallery.photos[0].src = '/assets/uploads/20261015-abcdef0123-1440.webp';
+  assert.match((await save({ home: photo })).data.message, /foto ontbreekt/);
+  assert.equal((await save({ paginas: {} })).status, 400);
+
+  const contact = { intro: '  <script>alert(1)</script>Welkom!  \u0007 ' };
+  const ok = await save({ contact });
+  assert.equal(ok.status, 200);
+  assert.equal((await read('contact')).intro, 'alert(1)Welkom!');
+  // The price schedule itself cannot be changed through the admin.
+  const schedule = structuredClone(content.prijzen);
+  schedule.change.increase = 99;
+  schedule.groups[0].rows[0].price = 52;
+  assert.equal((await api.call('save', { method: 'POST', body: { content: { prijzen: schedule }, versions: ok.data.versions } })).status, 200);
+  const saved = await read('prijzen');
+  assert.equal(saved.change.increase, 2.5);
+  assert.equal(saved.groups[0].rows[0].price, 52);
+});
+
+test('a stale editor cannot overwrite newer content', async () => {
+  const api = client(origin);
+  await login(api);
+  const { content, versions } = (await api.call('content')).data;
+  const first = await api.call('save', { method: 'POST', body: { content: { contact: { intro: 'Eerste' } }, versions } });
+  assert.equal(first.status, 200);
+  const stale = await api.call('save', { method: 'POST', body: { content: { contact: { intro: 'Oud venster' } }, versions } });
+  assert.equal(stale.status, 409);
+  assert.match(stale.data.message, /Ververs de pagina/);
+  assert.equal((await read('contact')).intro, 'Eerste');
+  assert.ok(content);
+});
+
+test('photo uploads: only real images, resized to WebP without metadata, signed until saved', async () => {
+  const api = client(origin);
+  await login(api);
+  const upload = buffer => api.call('upload', { method: 'POST', body: { image: buffer.toString('base64') } });
+  assert.equal((await upload(Buffer.from('<?php echo 1; ?>'))).status, 415);
+  assert.equal((await upload(Buffer.concat([Buffer.from([0xff, 0xd8, 0xff]), Buffer.from('not really')]))).status, 415);
+  const small = await sharp({ create: { width: 200, height: 200, channels: 3, background: '#fff' } }).jpeg().toBuffer();
+  assert.match((await upload(small)).data.message, /te klein/);
+  const photo = await sharp({ create: { width: 2400, height: 3000, channels: 3, background: '#d83f85' } })
+    .withMetadata({ exif: { IFD0: { Make: 'Telefoon' }, GPS: { GPSLatitudeRef: 'N' } } }).jpeg({ quality: 92 }).toBuffer();
+  const res = await upload(photo);
+  assert.equal(res.status, 200, JSON.stringify(res.data));
+  assert.match(res.data.src, /^\/assets\/uploads\/\d{8}-[0-9a-f]{10}-1440\.webp$/);
+  assert.match(res.data.preview, /^data:image\/webp;base64,/);
+
+  const { content, versions } = (await api.call('content')).data;
+  const home = structuredClone(content.home);
+  home.gallery.photos[2].src = res.data.src;
+  const forged = { ...res.data.upload, shas: { ...res.data.upload.shas, 640: '0'.repeat(40) } };
+  assert.equal((await api.call('save', { method: 'POST', body: { content: { home }, versions, uploads: [forged] } })).status, 400);
+  const saved = await api.call('save', { method: 'POST', body: { content: { home }, versions, uploads: [res.data.upload] } });
+  assert.equal(saved.status, 200);
+  const uploads = (await readdir(path.join(site.root, 'public', 'assets', 'uploads'))).filter(n => n.startsWith(res.data.upload.id));
+  assert.deepEqual(uploads.sort(), [`${res.data.upload.id}-1440.webp`, `${res.data.upload.id}-640.webp`]);
+  for (const name of uploads) {
+    const meta = await sharp(await readFile(path.join(site.root, 'public', 'assets', 'uploads', name))).metadata();
+    assert.equal(meta.format, 'webp');
+    assert.equal(meta.width, Number(name.match(/-(\d+)\.webp$/)[1]));
+    assert.equal(meta.exif, undefined, 'no EXIF/GPS');
+  }
+  assert.equal((await read('home')).gallery.photos[2].src, res.data.src);
+  const media = await api.call('media', { query: `&src=${res.data.src}` });
+  assert.equal(media.status, 200);
+  assert.equal(media.headers.get('content-type'), 'image/webp');
+  assert.equal((await api.call('media', { query: '&src=/../../server.mjs' })).status, 400);
+});
+
+test('GitHub storage: one commit per save, persists across restarts, never exposes the token', async () => {
+  const github = await startMockGitHub({ root: site.root });
   try {
-    await mkdir(new URL('scripts/', dir), { recursive: true });
-    await mkdir(new URL('public/assets/uploads/', dir), { recursive: true });
-    for (const file of ['server.mjs', 'vercel.json', 'scripts/build.mjs', 'scripts/content.mjs']) {
-      await writeFile(new URL(file, dir), await read(file));
-    }
-    await cp(new URL('public/index.html', root), new URL('public/index.html', dir));
-    await cp(new URL('public/content/', root), new URL('public/content/', dir), { recursive: true });
-    // A large phone photo with location metadata.
-    await sharp({ create: { width: 3000, height: 4000, channels: 3, background: '#d83f85' } })
-      .withMetadata({ exif: { IFD0: { Make: 'Phone' }, GPS: { GPSLatitudeRef: 'N' } } }).jpeg()
-      .toFile(fileURLToPath(new URL('public/assets/uploads/IMG 2041.jpg', dir)));
-    const home = JSON.parse(await read('public/content/home.json'));
-    home.gallery.photos[0].src = '/assets/uploads/IMG 2041.jpg';
-    await writeFile(new URL('public/content/home.json', dir), JSON.stringify(home));
-    await promisify(execFile)(process.execPath, [fileURLToPath(new URL('scripts/build.mjs', dir))]);
-    const uploads = await readdir(new URL('dist/assets/uploads/', dir));
-    assert.deepEqual(uploads.sort(), ['IMG 2041-1440.webp', 'IMG 2041-640.webp']);
-    for (const name of uploads) {
-      const meta = await sharp(await readFile(new URL(`dist/assets/uploads/${name}`, dir))).metadata();
-      assert.equal(meta.width, Number(name.match(/-(\d+)\.webp$/)[1]));
-      assert.equal(meta.exif, undefined);
-    }
-    const script = await readFile(new URL('dist/content.js', dir), 'utf8');
-    assert.match(script, /"src":"\/assets\/uploads\/IMG 2041-1440\.webp"/);
-    assert.doesNotMatch(script, /IMG 2041\.jpg/);
-    assert.deepEqual((await readdir(new URL('dist/', dir))).filter(n => n === 'content'), []);
+    Object.assign(process.env, { GITHUB_CONTENT_TOKEN: 'test-token', GITHUB_API_URL: github.api });
+    const api = client(origin);
+    await login(api);
+    const loaded = await api.call('content');
+    assert.equal(loaded.data.storage, 'github');
+    assert.doesNotMatch(JSON.stringify(loaded.data), /test-token/);
+    const photo = await sharp({ create: { width: 1200, height: 1500, channels: 3, background: '#8e2253' } }).png().toBuffer();
+    const upload = (await api.call('upload', { method: 'POST', body: { image: photo.toString('base64') } })).data;
+    const home = structuredClone(loaded.data.content.home);
+    home.hero.title = 'Nieuwe *titel*';
+    home.treatments.cards[0].photo = upload.src;
+    const saved = await api.call('save', { method: 'POST', body: { content: { home }, versions: loaded.data.versions, uploads: [upload.upload] } });
+    assert.equal(saved.status, 200, JSON.stringify(saved.data));
+    assert.equal(github.commits().length, 1);
+    assert.equal(github.commits()[0].message, 'Website bijgewerkt via het beheer');
+    assert.equal(JSON.parse(github.file('public/content/home.json')).hero.title, 'Nieuwe *titel*');
+    assert.ok(github.file(`public/assets/uploads/${upload.upload.id}-1440.webp`));
+    assert.ok(github.file(`public/assets/uploads/${upload.upload.id}-640.webp`));
+    const written = github.log.filter(entry => entry.method === 'POST' && entry.path.endsWith('/git/trees')).flatMap(entry => entry.body.tree.map(t => t.path));
+    assert.ok(written.every(p => /^public\/(content\/[a-z]+\.json|assets\/uploads\/[a-z0-9-]+\.webp)$/.test(p)), written.join());
+
+    // A redeploy / server restart reads the saved content back from GitHub.
+    await stopServer();
+    await startServer();
+    const again = client(origin);
+    await login(again);
+    const reloaded = (await again.call('content')).data;
+    assert.equal(reloaded.content.home.hero.title, 'Nieuwe *titel*');
+    assert.equal(reloaded.content.home.treatments.cards[0].photo, upload.src);
+    assert.equal((await again.call('media', { query: `&src=${upload.src}` })).status, 200);
+
+    github.externalCommit('public/content/home.json', JSON.stringify({ ...reloaded.content.home, booking: { ...reloaded.content.home.booking, text: 'Extern' } }, null, 2));
+    const conflict = await again.call('save', { method: 'POST', body: { content: { home: reloaded.content.home }, versions: reloaded.versions } });
+    assert.equal(conflict.status, 409);
   } finally {
-    await rm(dir, { recursive: true, force: true });
+    await github.close();
+  }
+});
+
+test('price rules: immediate and scheduled changes stay separate, and roll over on the date', () => {
+  const change = { date: '2027-01-01', increase: 2.5 };
+  const row = { name: 'BIAB', desc: '', price: 50, medium: 52.5, hand: true, next: null, nextMedium: null };
+  assert.deepEqual(describePrice(row, 'price', change), { current: 50, future: 52.5, mode: 'auto' });
+  // Direct change of kort: medium keeps its automatic increase.
+  let choices = choicesOf(row, change);
+  choices.price.current = 51;
+  const direct = encode(row, choices);
+  assert.deepEqual([direct.price, direct.medium, direct.hand, direct.next, direct.nextMedium], [51, 52.5, true, null, null]);
+  // Scheduled kort price; medium stays automatic.
+  choices = choicesOf(row, change);
+  choices.price.mode = 'custom';
+  choices.price.custom = 55;
+  const scheduled = encode(row, choices);
+  assert.deepEqual([scheduled.price, scheduled.next, describePrice(scheduled, 'medium', change).future], [50, 55, 55]);
+  // No increase for medium only.
+  choices = choicesOf(row, change);
+  choices.medium.mode = 'none';
+  const mixed = encode(row, choices);
+  assert.deepEqual([describePrice(mixed, 'price', change).future, describePrice(mixed, 'medium', change).future], [52.5, 52.5]);
+  choices = choicesOf(mixed, change);
+  choices.medium.current = 54;
+  assert.equal(describePrice(encode(mixed, choices), 'medium', change).future, 54, 'a later direct change keeps "no increase"');
+  const prijzen = { since: '2025-09-01', change, groups: [{ title: 'x', intro: '', rows: [scheduled, { ...row, hand: false }] }] };
+  assert.equal(rollOver(prijzen, '2026-12-31'), prijzen);
+  const rolled = rollOver(prijzen, '2027-01-01');
+  assert.equal(rolled.change, null);
+  assert.equal(rolled.since, '2027-01-01');
+  assert.deepEqual(rolled.groups[0].rows.map(r => [r.price, r.medium]), [[55, 55], [50, 52.5]]);
+  const validated = validateFile('prijzen', structuredClone(prijzen), structuredClone(prijzen), '2027-01-02');
+  assert.equal(validated.change, null, 'saving after the date applies the new prices permanently');
+});
+
+test('editor preview is the real homepage with the draft content and edit bridge', async () => {
+  const index = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
+  const html = previewHtml(index);
+  assert.match(html, /<script src="\/admin\/preview-content\.js" defer><\/script>\n<script src="\/app\.js/);
+  assert.match(html, /preview-bridge\.js/);
+  assert.match(html, /<meta name="robots" content="noindex, nofollow">/);
+  assert.doesNotMatch(html, /src="\/content\.js"/);
+  const response = await fetch(`${origin}/admin/preview.html`);
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get('content-security-policy'), /frame-ancestors 'self'/);
+  assert.equal(response.headers.get('x-frame-options'), 'SAMEORIGIN');
+  const publicPage = await fetch(`${origin}/`);
+  assert.match(publicPage.headers.get('content-security-policy'), /connect-src 'none'.*frame-ancestors 'none'/);
+  assert.equal(publicPage.headers.get('x-frame-options'), 'DENY');
+});
+
+test('no secrets, passwords or tokens in anything sent to the browser', async () => {
+  const files = ['public/admin/index.html', 'public/admin/admin.js', 'public/admin/prices.js', 'public/admin/preview-bridge.js', 'public/admin/preview-content.js', 'public/app.js', 'public/index.html'];
+  for (const file of files) {
+    const text = await readFile(new URL(`../${file}`, import.meta.url), 'utf8');
+    assert.doesNotMatch(text, /scrypt\$|ADMIN_SESSION_SECRET|GITHUB_CONTENT_TOKEN|KV_REST_API_TOKEN|ghp_|github_pat_|Roze-Nagels/, file);
   }
 });

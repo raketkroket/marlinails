@@ -55,8 +55,13 @@ keyboard, real-device and 200% browser zoom testing remains important.
 - `public/content/*.json`: editable texts, photos and prices (edited via `/admin`).
 - `public/app.js`: fixed business details (phone, address, hours), rendering,
   navigation, dated prices and the email-draft form.
-- `public/admin/`: Decap CMS admin; `api/`: its GitHub login (Vercel functions).
-- `scripts/content.mjs`: bundles the content JSON into `/content.js`.
+- `public/admin/`: "Mijn website", Marjon's visual editor (login, dashboard,
+  click-to-edit preview, photos, price list). `public/admin/prices.js` holds the
+  price rules shared with the server.
+- `api/admin.js` + `api/_lib/`: the editor's API (one Vercel function): login,
+  sessions, rate limiting, validation, photo processing and storage.
+- `scripts/content.mjs`: bundles the content JSON into `/content.js`;
+  `scripts/preview.mjs` builds `/admin/preview.html` from `index.html`.
 - `public/assets/`: original salon images/logo and locally hosted Google Fonts.
 - `server.mjs`: dependency-free, read-only public-file server with security headers.
 - `dist/`: static deployment output produced by `npm run build`.
@@ -67,8 +72,8 @@ Import `raketkroket/marlinails`, use the repository root, and set the production
 branch to `main`. The checked-in `vercel.json` selects the Other framework preset,
 runs `npm ci` and `npm run build`, and publishes only `dist`. Use Node.js 24.x.
 Pushing to `main` triggers a production deployment when the Vercel Git integration
-is enabled. The public site needs no environment variables; the admin login
-needs two (see "Content editing (admin)").
+is enabled. The public site needs no environment variables; the editor needs
+the secrets listed under "Website editor (admin)".
 
 Vercel does not use the generated `_headers` file. `vercel.json` explicitly applies
 the production security headers instead; the build fails if they differ from the
@@ -117,17 +122,20 @@ date labels are derived from it.
 - **Awaiting Marjon's confirmation, currently not raised:** nail art
   (€3,00 per nagel), breuk per nagel (€10,00/€12,50) and verwijderen gelpolish
   (€17,50). Marjon can tick "Handbehandeling" for these in the admin.
-- After the change has passed, the base prices can be updated and
-  `priceChange` moved to the next change (or the announcement removed).
+- Rows may also carry a scheduled price (`next` / `nextMedium`) set in the
+  editor with "Vanaf 1 januari 2027"; it overrides the automatic increase.
+- The first save in the editor on or after the date makes the new prices the
+  normal prices and removes the schedule (`change` becomes `null`).
 
 Browser tests fix the clock to verify both sides of the switch.
 
 ## Replacing photos
 
-Via `/admin`: choose a new photo in the field, adjust the description and
-caption, and publish. Uploads go to `public/assets/uploads/`; the build deploys
-only resized 640/1440 px WebP copies (orientation fixed, metadata such as GPS
-removed). The original upload does stay in the (public) GitHub repository.
+Via the editor: click the photo (or use Foto's), choose a file, adjust the crop,
+and save. The browser shrinks the photo first; the server checks that it really
+is a JPG/PNG/WebP, then stores only 640 px and 1440 px WebP copies (orientation
+fixed, all metadata such as GPS removed) in `public/assets/uploads/`. The
+original photo is never stored or committed.
 
 By hand: put the original in `public/`, add it to `scripts/optimize-images.mjs`
 if needed, run `npm run images`, and point the JSON at its `-1440.webp` copy.
@@ -151,38 +159,74 @@ the domain points here. To migrate (with Marjon's approval):
    `https://www.marlinails.nl/` in Google Search Console.
 5. Cancel the old WordPress hosting only after everything is verified.
 
-## Content editing (admin)
+## Website editor (admin)
 
-`/admin/` runs [Decap CMS](https://decapcms.org/) 3.16.3 (pinned, with
-subresource integrity). Marjon can edit existing texts, photos, captions and
-prices on all five pages; she cannot add or remove pages, sections or list items.
-Phone, email, address and opening hours stay fixed in `public/app.js` because
-they also appear in the structured data. Every save is a commit on `main`, so
-Vercel redeploys within about a minute and any change can be reverted in Git.
-Dutch guide for Marjon: `docs/BEHEER-HANDLEIDING.md`. Options considered:
-`docs/ADMIN-CMS-OPTIONS.md`.
+`/admin/` is "Mijn website": a Dutch editor where Marjon logs in with a username
+and password, clicks a text, photo or price on a live preview of her own website,
+changes it and presses **Opslaan**. She can only change existing content: no new
+pages, sections or list items, and no code. Phone, email, address and opening
+hours stay fixed in `public/app.js` (they are also in the structured data).
+Dutch guide: `docs/BEHEER-HANDLEIDING.md`.
 
-One-time setup (until this is done, `/admin/` shows the login but it fails safely):
+### How saving works
 
-1. GitHub → Settings → Developer settings → OAuth Apps → New OAuth App.
-   Homepage `https://marlinails.vercel.app`, callback
-   `https://marlinails.vercel.app/api/callback`. Generate a client secret.
-2. Vercel → Project → Settings → Environment Variables (Production):
-   `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET`. Redeploy.
-3. Marjon creates a GitHub account; invite it under the repository's
-   Settings → Collaborators with write access. Only accounts with write access
-   can save.
-4. After the domain move, change the OAuth app URLs and `site_url`/`display_url`
-   in `public/admin/config.yml` to `https://www.marlinails.nl`.
+The API (`api/admin.js`) validates every save against the stored content (same
+structure, safe text without HTML, prices 0–1000 with two decimals, known photo
+paths) and writes it to the GitHub repository with a server-side token: one
+commit per save, containing only `public/content/*.json` and processed WebP
+photos in `public/assets/uploads/`. Vercel then redeploys the site (about a
+minute); the editor shows when the change is live. Because content lives in the
+repository, saves survive refreshes, logouts, redeploys and restarts, every
+change is versioned, and the public site stays static with its strict CSP.
+A stale editor window cannot overwrite newer content (conflict check).
 
-Security: the secret exists only in Vercel; `api/auth.js` and `api/callback.js`
-use a one-time state cookie, never store tokens, and hand the token only to the
-same-origin admin window. `/admin/` has its own CSP (CMS bundle from unpkg,
-GitHub API, and `'unsafe-eval'`, which Decap's config validator needs); the
-public site keeps its strict CSP and loads content from the same-origin
-`/content.js`. `tests/admin.test.mjs` checks that every content field is
-editable (so saves never drop data), that lists cannot grow or shrink, the
-OAuth flow, and upload optimization.
+### Security
+
+- Password: only a scrypt hash is stored, as a Vercel secret. Sessions are
+  HMAC-signed, HTTP-only, `SameSite=Strict`, `Secure` cookies (`__Host-` prefix),
+  logged out after 24 h without activity and always after 7 days. Changing the
+  password ends all sessions.
+- Every action needs a session; every write also needs the session's CSRF token
+  and a same-origin request. Uploads are only possible when logged in.
+- Login limits: 5 failed attempts per IP per 15 minutes and 20 per hour for the
+  account, shared across serverless instances via Upstash Redis. On Vercel the
+  editor refuses to run without Redis, the password hash or the session secret.
+- `/admin/` has its own CSP (same-origin scripts/API only, may frame its own
+  preview); the public site's CSP and `frame-ancestors 'none'` are unchanged.
+- No registration, no tokens or keys in the browser.
+
+### One-time setup (required before the editor works in production)
+
+1. **Password**: run `npm run admin:wachtwoord` locally and enter Marjon's
+   password (min. 12 characters, typed hidden). It prints `ADMIN_PASSWORD_HASH`
+   and a random `ADMIN_SESSION_SECRET`.
+2. **GitHub token**: GitHub → Settings → Developer settings → Fine-grained
+   personal access tokens → Generate. Repository access: only
+   `raketkroket/marlinails`; permissions: **Contents: Read and write**. Copy it as
+   `GITHUB_CONTENT_TOKEN`. (Expiry: pick the longest your account allows and set
+   a reminder; when it expires, saving shows an error until it is replaced.)
+3. **Redis (free)**: Vercel → Project → Storage / Marketplace → Upstash for
+   Redis (free plan) → connect to this project. This adds `KV_REST_API_URL` and
+   `KV_REST_API_TOKEN` (or `UPSTASH_REDIS_REST_URL`/`_TOKEN`).
+4. Vercel → Project → Settings → Environment Variables (Production): add
+   `ADMIN_PASSWORD_HASH`, `ADMIN_SESSION_SECRET`, `GITHUB_CONTENT_TOKEN`.
+   Optional: `ADMIN_USERNAME` (default `marjon123`), `GITHUB_BRANCH` (default
+   `main`). Then redeploy.
+5. Test: open `/admin/`, log in, change a word, refresh, and check the live site
+   a minute later. Change it back the same way.
+
+**Password reset**: run `npm run admin:wachtwoord` again, replace
+`ADMIN_PASSWORD_HASH` in Vercel and redeploy. All sessions end automatically.
+Give Marjon the new password in person or by phone.
+
+### Local development
+
+Without `GITHUB_CONTENT_TOKEN` (and not on Vercel) the editor saves straight into
+this checkout (`public/content`, `public/assets/uploads`), or into
+`ADMIN_LOCAL_ROOT` when set. Start it with the two `ADMIN_*` secrets set:
+`ADMIN_PASSWORD_HASH=... ADMIN_SESSION_SECRET=... npm start`, then open
+`http://127.0.0.1:3000/admin/`. Tests use a throwaway copy plus local stand-ins
+for the GitHub and Upstash REST APIs (`tests/helpers/mocks.mjs`).
 
 ## Content and assets
 

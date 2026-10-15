@@ -115,7 +115,7 @@ test('production build and browser CSP hashes agree for Linux and Windows line e
       await mkdir(path.join(root, 'public'), { recursive: true });
       await mkdir(path.join(root, 'scripts'), { recursive: true });
       await mkdir(path.join(root, 'public', 'content'), { recursive: true });
-      for (const file of ['server.mjs', 'vercel.json', 'scripts/build.mjs', 'scripts/content.mjs', 'public/index.html',
+      for (const file of ['server.mjs', 'vercel.json', 'scripts/build.mjs', 'scripts/content.mjs', 'scripts/preview.mjs', 'public/index.html',
         ...contentFiles.map(name => `public/content/${name}.json`)]) {
         const content = await readFile(new URL(`../${file}`, import.meta.url), 'utf8');
         await writeFile(path.join(root, file), content.replace(/\r\n?/g, '\n').replace(/\n/g, newline));

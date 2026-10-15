@@ -1,7 +1,10 @@
-# Content editing for Marjon: options (option A implemented)
+# Content editing for Marjon: options considered
 
-Status: **option A was approved and implemented** (October 2026); see the README,
-"Content editing (admin)", for setup. This document keeps the original comparison.
+Status (October 2026): option A (Decap CMS with GitHub login) was built first, then
+replaced by a custom visual editor because Marjon must not need a GitHub account.
+The custom editor keeps option A's storage idea (content in the repository, written
+server-side) but with a username/password login. See the README, "Website editor
+(admin)". This document keeps the original comparison.
 
 ## Intended scope
 

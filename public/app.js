@@ -36,7 +36,7 @@ const hasValue=v=>v!==null&&v!==undefined&&v!=='';
    of de build voor uploads via /admin); andere bestanden worden direct gebruikt. */
 function imgOf(src,alt,{sizes='(min-width:1180px) 440px, (min-width:600px) 45vw, 80vw',ratio='4:5',focus,label}={}){
   if(!src) return {srcs:[],alt,ratio,label};
-  const img={srcs:[src],alt:alt||'',ratio,label,focus:FOCUS[focus]||FOCUS.center};
+  const img={srcs:[src],alt:alt||'',ratio,label,focus:FOCUS[focus]||(/^\d{1,3}% \d{1,3}%$/.test(focus||'')?focus:FOCUS.center)};
   if(/-1440\.webp$/.test(src)){img.srcset=`${src.replace(/-1440\.webp$/,'-640.webp')} 640w, ${src} 1440w`;img.sizes=sizes}
   return img;
 }
@@ -49,18 +49,18 @@ function adapt(J){
   const H=J.home,P=J.prijzen,O=J.over;
   const card='(min-width:1180px) 300px, (min-width:860px) 45vw, 120px';
   const prices=P.groups.map((g,i)=>{
-    const rows=g.rows.map(r=>{const k=num(r.price),m=num(r.medium);return {name:r.name,desc:r.desc,price:m===null?k:[k,m],hand:!!r.hand}});
+    const rows=g.rows.map(r=>{const k=num(r.price),m=num(r.medium);return {name:r.name,desc:r.desc,price:m===null?k:[k,m],next:[num(r.next),num(r.nextMedium)],hand:!!r.hand}});
     return {id:PRICE_GROUP_IDS[i]||`groep-${i+1}`,title:g.title,intro:g.intro,single:g.rows.every(r=>!hasValue(r.medium)),rows};
   });
   return {...SITE,J,
     images:{
-      hero:imgOf(H.hero.photo.src,H.hero.photo.alt,{sizes:'100vw',ratio:null,label:'Foto'}),
+      hero:imgOf(H.hero.photo.src,H.hero.photo.alt,{sizes:'100vw',ratio:null,label:'Foto',focus:H.hero.photo.focus}),
       about:imgOf(O.portrait.src,O.portrait.alt,{sizes:'(min-width:1024px) 520px, (min-width:600px) 420px, 90vw',focus:O.portrait.focus,label:'Marjon van Rossum'})
     },
     facts:H.welcome.facts,
-    services:H.treatments.cards.map((c,i)=>({name:c.name,text:c.text,...(SERVICE_LINKS[i]||{to:PRICE_GROUP_IDS[0]}),img:imgOf(c.photo,'',{sizes:card,label:c.name})})),
+    services:H.treatments.cards.map((c,i)=>({name:c.name,text:c.text,...(SERVICE_LINKS[i]||{to:PRICE_GROUP_IDS[0]}),img:imgOf(c.photo,'',{sizes:card,label:c.name,focus:c.focus})})),
     gallery:H.gallery.photos.map(p=>({...imgOf(p.src,p.alt,{focus:p.focus,label:p.caption}),caption:p.caption})),
-    priceChange:{date:P.change.date,label:dutchDate(P.change.date),until:dutchDate(dayBefore(P.change.date)),increase:Number(P.change.increase)},
+    priceChange:P.change&&P.change.date?{date:P.change.date,label:dutchDate(P.change.date),until:dutchDate(dayBefore(P.change.date)),increase:Number(P.change.increase)}:null,
     pricesSince:dutchDate(P.since),
     prices,
     priceNotes:[P.lengthNote,P.cancelNote],
@@ -93,7 +93,7 @@ const route=`https://www.google.com/maps/dir/?api=1&destination=${encodeURICompo
 /* Bewerkbare teksten: data-c = platte tekst, data-c-rich = met *accent* en regelafbrekingen. */
 $$('[data-c]').forEach(el=>{const v=lookup(C.J,el.dataset.c);if(hasValue(v))el.textContent=v});
 $$('[data-c-rich]').forEach(el=>{const v=lookup(C.J,el.dataset.cRich);if(hasValue(v))el.innerHTML=rich(v)});
-$('#facts').innerHTML=C.facts.map(f=>`<li><strong>${esc(f.title)}</strong><span>${esc(f.text)}</span></li>`).join('');
+$('#facts').innerHTML=C.facts.map((f,i)=>`<li><strong data-edit="home.welcome.facts.${i}.title">${esc(f.title)}</strong><span data-edit="home.welcome.facts.${i}.text">${esc(f.text)}</span></li>`).join('');
 
 function placeholder(el,label){
   console.error('Afbeelding niet beschikbaar:',label);
@@ -137,40 +137,45 @@ $('#nav').innerHTML=navHtml;$('#mnav').innerHTML=navHtml;$('#fnav').innerHTML=na
    alleen als aankondiging te bekijken; vanaf die datum gelden ze automatisch. */
 const PC=C.priceChange;
 const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Amsterdam',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-const changeActive=today>=PC.date;
+const changeActive=!PC||today>=PC.date;
 const money=n=>n.toFixed(2).replace('.',',');
 const eur=n=>n===0?'Gratis':`€\u00A0${money(n)}`;
 const eurShort=n=>`€\u00A0${Number.isInteger(n)?n:money(n)}`;
-const priceOf=(row,future)=>{const add=future&&row.hand?PC.increase:0;return Array.isArray(row.price)?row.price.map(p=>p+add):row.price+add};
+/* Vanaf de ingangsdatum: een ingeplande prijs (next) of de huidige prijs plus de verhoging voor handbehandelingen. */
+const priceOf=(row,future)=>{
+  if(!future||!PC) return row.price;
+  const out=[].concat(row.price).map((p,i)=>row.next[i]!==null?row.next[i]:Math.round((p+(row.hand?PC.increase:0))*100)/100);
+  return Array.isArray(row.price)?out:out[0];
+};
 const serviceFrom=(s,future)=>{
   const g=C.prices.find(x=>x.id===s.to);if(!g)return '';
   const rows=(s.row!=null?[g.rows[s.row]]:g.rows).filter(Boolean);if(!rows.length)return '';
   return `Vanaf ${eurShort(Math.min(...rows.map(r=>[].concat(priceOf(r,future))[0])))}${s.suffix||''}`;
 };
 
-$('#cards').innerHTML=C.services.map((s,i)=>`<li><a class="card" href="#/prijslijst/${s.to}"><div class="ph reveal" data-card="${i}"></div><div class="card-b"><span class="treat-number" aria-hidden="true">0${i+1}</span><h3>${esc(s.name)}</h3><p>${esc(s.text)}</p><div class="card-f"><span class="price">${esc(serviceFrom(s,changeActive))}</span><span class="go">Bekijk prijzen<span aria-hidden="true">↗</span></span></div></div></a></li>`).join('');
+$('#cards').innerHTML=C.services.map((s,i)=>`<li><a class="card" href="#/prijslijst/${s.to}"><div class="ph reveal" data-card="${i}" data-edit-img="home.treatments.cards.${i}.photo"></div><div class="card-b"><span class="treat-number" aria-hidden="true">0${i+1}</span><h3 data-edit="home.treatments.cards.${i}.name">${esc(s.name)}</h3><p data-edit="home.treatments.cards.${i}.text">${esc(s.text)}</p><div class="card-f"><span class="price">${esc(serviceFrom(s,changeActive))}</span><span class="go">Bekijk prijzen<span aria-hidden="true">↗</span></span></div></div></a></li>`).join('');
 $$('[data-card]').forEach(el=>{fill(el,{...C.services[+el.dataset.card].img,alt:''},{ratio:false});el.setAttribute('aria-hidden','true')});
-$('#treatFoot').textContent=changeActive?`Prijzen geldig vanaf ${PC.label}.`:`Prijzen geldig t/m ${PC.until}. Per ${PC.label} gelden nieuwe tarieven voor handbehandelingen.`;
+$('#treatFoot').textContent=!PC?`Prijzen geldig vanaf ${C.pricesSince}.`:changeActive?`Prijzen geldig vanaf ${PC.label}.`:`Prijzen geldig t/m ${PC.until}. Per ${PC.label} gelden nieuwe tarieven voor handbehandelingen.`;
 
-$('#gal').innerHTML=C.gallery.map((g,i)=>`<figure><button type="button" data-i="${i}" aria-label="Vergroot foto: ${esc(g.caption)}"><div class="ph reveal" data-g="${i}"></div><span class="gallery-zoom" aria-hidden="true">↗</span></button><figcaption><span class="photo-index" aria-hidden="true">0${i+1}</span><span>${esc(g.caption)}</span></figcaption></figure>`).join('');
+$('#gal').innerHTML=C.gallery.map((g,i)=>`<figure><button type="button" data-i="${i}" aria-label="Vergroot foto: ${esc(g.caption)}"><div class="ph reveal" data-g="${i}" data-edit-img="home.gallery.photos.${i}"></div><span class="gallery-zoom" aria-hidden="true">↗</span></button><figcaption><span class="photo-index" aria-hidden="true">0${i+1}</span><span data-edit="home.gallery.photos.${i}.caption">${esc(g.caption)}</span></figcaption></figure>`).join('');
 $$('[data-g]').forEach(el=>{const g=C.gallery[+el.dataset.g];fill(el,{...g,label:g.caption},{ratio:false})});
 
 
 /* Prijslijst */
 $('#pidx').innerHTML=C.prices.map(g=>`<li><a href="#/prijslijst/${g.id}" data-idx="${g.id}">${esc(g.title)}</a></li>`).join('');
-const priceRows=(g,future)=>g.rows.map(row=>{
-  const p=priceOf(row,future);let pr;
-  if(g.single) pr=`<td data-label="Prijs">${eur(p)}</td>`;
-  else if(!Array.isArray(p)) pr=`<td colspan="2" data-label="Kort en medium"><span class="sr">Kort en medium: </span>${eur(p)}</td>`;
-  else pr=`<td data-label="Kort">${eur(p[0])}</td><td data-label="Medium">${eur(p[1])}</td>`;
-  return `<tr><th scope="row">${esc(row.name)}${row.desc?`<span class="ds">${esc(row.desc)}</span>`:''}</th>${pr}</tr>`;
+const priceRows=(g,future)=>g.rows.map((row,j)=>{
+  const p=priceOf(row,future),at=`prijzen.groups.${C.prices.indexOf(g)}.rows.${j}`;let pr;
+  if(g.single) pr=`<td data-label="Prijs" data-edit-price="${at}.price">${eur(p)}</td>`;
+  else if(!Array.isArray(p)) pr=`<td colspan="2" data-label="Kort en medium" data-edit-price="${at}.price"><span class="sr">Kort en medium: </span>${eur(p)}</td>`;
+  else pr=`<td data-label="Kort" data-edit-price="${at}.price">${eur(p[0])}</td><td data-label="Medium" data-edit-price="${at}.medium">${eur(p[1])}</td>`;
+  return `<tr><th scope="row"><span data-edit="${at}.name">${esc(row.name)}</span>${row.desc?`<span class="ds" data-edit="${at}.desc">${esc(row.desc)}</span>`:''}</th>${pr}</tr>`;
 }).join('');
-const periodText=future=>future?`Prijzen geldig vanaf ${PC.label}.`:`Prijzen geldig vanaf ${C.pricesSince} tot en met ${PC.until}.`;
+const periodText=future=>!PC?`Prijzen geldig vanaf ${C.pricesSince}.`:future?`Prijzen geldig vanaf ${PC.label}.`:`Prijzen geldig vanaf ${C.pricesSince} tot en met ${PC.until}.`;
 const changeNotice=changeActive?'':`<section class="price-change" aria-labelledby="pc-title"><div><span class="kicker">Aankondiging</span><h2 id="pc-title">Nieuwe tarieven per ${esc(PC.label)}</h2><p>Per ${esc(PC.label)} worden de prijzen van de handbehandelingen met ${esc(eur(PC.increase))} verhoogd. Tot en met ${esc(PC.until)} gelden de huidige prijzen.</p></div><div class="period-switch" role="group" aria-label="Toon prijzen"><button type="button" data-period="now" aria-pressed="true">Huidige prijzen<small>t/m ${esc(PC.until)}</small></button><button type="button" data-period="future" aria-pressed="false">Nieuwe prijzen<small>vanaf ${esc(PC.label)}</small></button></div></section>`;
 $('#pmain').innerHTML=changeNotice+`<p class="period-status" id="periodStatus" aria-live="polite">${esc(periodText(changeActive))}</p>`+C.prices.map(g=>{
   const cols=g.single?`<th scope="col">Prijs</th>`:`<th scope="col">Kort</th><th scope="col">Medium</th>`;
-  return `<section class="pg" id="${g.id}" aria-labelledby="pg-${g.id}"><div class="pg-head"><h2 id="pg-${g.id}">${esc(g.title)}</h2>${g.intro?`<p>${esc(g.intro)}</p>`:''}</div><table class="price-table"><caption class="sr">${esc(g.title)}, prijzen in euro's</caption><thead><tr><th scope="col">Behandeling</th>${cols}</tr></thead><tbody data-group="${g.id}">${priceRows(g,changeActive)}</tbody></table></section>`;
-}).join('')+`<div class="note-box"><h2>Over teennagels</h2><p>${esc(C.toeNote)}</p></div><div class="pnotes"><p>${esc(changeActive?`Alle prijzen zijn in euro's en gelden vanaf ${PC.label}.`:`Alle prijzen zijn in euro's. De huidige prijzen gelden vanaf ${C.pricesSince} tot en met ${PC.until}. Per ${PC.label} stijgen de prijzen van de handbehandelingen met ${eur(PC.increase)}.`)}</p>${C.priceNotes.map(n=>`<p>${esc(n)}</p>`).join('')}</div><div class="hero-ctas"><a class="btn btn-pink" href="#/contact">Maak een afspraak</a><a class="btn btn-line" data-tel-href2>Bel ${esc(B.phone)}</a></div>`;
+  return `<section class="pg" id="${g.id}" aria-labelledby="pg-${g.id}"><div class="pg-head"><h2 id="pg-${g.id}" data-edit="prijzen.groups.${C.prices.indexOf(g)}.title">${esc(g.title)}</h2>${g.intro?`<p data-edit="prijzen.groups.${C.prices.indexOf(g)}.intro">${esc(g.intro)}</p>`:''}</div><table class="price-table"><caption class="sr">${esc(g.title)}, prijzen in euro's</caption><thead><tr><th scope="col">Behandeling</th>${cols}</tr></thead><tbody data-group="${g.id}">${priceRows(g,changeActive)}</tbody></table></section>`;
+}).join('')+`<div class="note-box"><h2>Over teennagels</h2><p data-edit="prijzen.toeNote">${esc(C.toeNote)}</p></div><div class="pnotes"><p>${esc(!PC?`Alle prijzen zijn in euro's en gelden vanaf ${C.pricesSince}.`:changeActive?`Alle prijzen zijn in euro's en gelden vanaf ${PC.label}.`:`Alle prijzen zijn in euro's. De huidige prijzen gelden vanaf ${C.pricesSince} tot en met ${PC.until}. Per ${PC.label} stijgen de prijzen van de handbehandelingen met ${eur(PC.increase)}.`)}</p>${C.priceNotes.map((n,i)=>`<p data-edit="prijzen.${['lengthNote','cancelNote'][i]}">${esc(n)}</p>`).join('')}</div><div class="hero-ctas"><a class="btn btn-pink" href="#/contact">Maak een afspraak</a><a class="btn btn-line" data-tel-href2>Bel ${esc(B.phone)}</a></div>`;
 $$('[data-tel-href2]').forEach(a=>a.href=tel);
 $('#pmain').addEventListener('click',e=>{
   const b=e.target.closest('[data-period]');if(!b)return;
@@ -181,14 +186,14 @@ $('#pmain').addEventListener('click',e=>{
 });
 
 /* Producten */
-$('#prods').innerHTML=C.products.map((c,i)=>`<section class="pcat" aria-labelledby="pc-${i}"><h2 id="pc-${i}">${rich(c.title)}</h2><ul class="prow pitems">${c.items.map(([n,s,p])=>`<li><div class="pline"><span class="nm">${esc(n)}</span><span class="dots" aria-hidden="true"></span><span class="pr">€ ${money(p)}</span></div><span class="sz">${esc(s)}</span></li>`).join('')}</ul></section>`).join('')+`<div class="prod-note"><p>Vragen over een product? Bel of mail gerust.</p><a class="btn btn-pink" href="#/contact">Neem contact op</a></div>`;
+$('#prods').innerHTML=C.products.map((c,i)=>`<section class="pcat" aria-labelledby="pc-${i}"><h2 id="pc-${i}" data-edit-rich="producten.categories.${i}.title">${rich(c.title)}</h2><ul class="prow pitems">${c.items.map(([n,s,p],j)=>`<li><div class="pline"><span class="nm" data-edit="producten.categories.${i}.items.${j}.name">${esc(n)}</span><span class="dots" aria-hidden="true"></span><span class="pr" data-edit-price="producten.categories.${i}.items.${j}.price">€ ${money(p)}</span></div><span class="sz" data-edit="producten.categories.${i}.items.${j}.size">${esc(s)}</span></li>`).join('')}</ul></section>`).join('')+`<div class="prod-note"><p>Vragen over een product? Bel of mail gerust.</p><a class="btn btn-pink" href="#/contact">Neem contact op</a></div>`;
 
 /* Over */
-$('#tl').innerHTML=C.timeline.map(([y,h,p])=>`<li><span class="yr">${esc(y)}</span><div><h3>${esc(h)}</h3><p>${esc(p)}</p></div></li>`).join('');
-$('#edu').innerHTML=C.education.map(([h,p],i)=>`<li><span class="edu-n" aria-hidden="true">0${i+1}</span><h3>${esc(h)}</h3><p>${esc(p)}</p></li>`).join('');
-$('#vals').innerHTML=C.values.map(([h,p])=>`<li><h3>${esc(h)}</h3><p>${esc(p)}</p></li>`).join('');
+$('#tl').innerHTML=C.timeline.map(([y,h,p],i)=>`<li><span class="yr" data-edit="over.story.timeline.${i}.period">${esc(y)}</span><div><h3 data-edit="over.story.timeline.${i}.title">${esc(h)}</h3><p data-edit="over.story.timeline.${i}.text">${esc(p)}</p></div></li>`).join('');
+$('#edu').innerHTML=C.education.map(([h,p],i)=>`<li><span class="edu-n" aria-hidden="true">0${i+1}</span><h3 data-edit="over.education.items.${i}.title">${esc(h)}</h3><p data-edit="over.education.items.${i}.text">${esc(p)}</p></li>`).join('');
+$('#vals').innerHTML=C.values.map(([h,p],i)=>`<li><h3 data-edit="over.values.items.${i}.title">${esc(h)}</h3><p data-edit="over.values.items.${i}.text">${esc(p)}</p></li>`).join('');
 $('#regIntro').textContent=C.register.intro;
-$('#regList').innerHTML=C.register.points.map(p=>`<li>${esc(p)}</li>`).join('');
+$('#regList').innerHTML=C.register.points.map((p,i)=>`<li data-edit="over.register.points.${i}">${esc(p)}</li>`).join('');
 $('#regYou').textContent=C.register.you;
 
 /* =====================================================================

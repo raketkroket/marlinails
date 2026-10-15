@@ -1,49 +1,79 @@
 # Uw website zelf aanpassen
 
-Met het beheer past u bestaande teksten, foto's en prijzen van de website van Marli Nails aan.
-Nieuwe pagina's of onderdelen toevoegen kan niet; vraag daarvoor de ontwikkelaar.
+Met **Mijn website** past u zelf de teksten, foto's en prijzen van uw website aan.
+U klikt op uw eigen website op wat u wilt veranderen, past het aan en klikt op
+**Opslaan**. Meer hoeft u niet te doen.
 
 ## Inloggen
 
 1. Ga naar **https://marlinails.vercel.app/admin/**
-2. Klik op **Inloggen met GitHub** en log in met uw GitHub-account.
-3. Kies onder **Pagina's** de pagina die u wilt aanpassen.
+2. Vul uw gebruikersnaam (**marjon123**) en uw wachtwoord in.
+   Met **Toon** ziet u wat u typt.
+3. Klik op **Inloggen**.
 
-## Iets aanpassen
+U blijft ingelogd op uw eigen computer of telefoon. Na een dag zonder gebruik
+wordt u automatisch uitgelogd, en altijd na een week. Op een computer van iemand
+anders: klik als u klaar bent op **Uitloggen**.
 
-- Klik op een onderdeel (bijvoorbeeld **Fotogalerij**) om het open te klappen.
-- Wijzig de tekst. In titels kunt u een woord tussen \*sterretjes\* zetten:
-  dat wordt de schuine roze accenttekst. Een nieuwe regel geeft een regelafbreking.
-- Klik rechtsboven op **Publiceer** → **Publiceer nu**.
-- Na ongeveer een minuut staat de wijziging op de website. Ververs de pagina
-  als u de oude versie nog ziet.
+## Een tekst aanpassen
+
+1. Klik op **Mijn website bewerken**.
+2. Kies bovenaan de pagina (Home, Prijslijst, Producten Seduction, Over Marli Nails of Contact).
+3. Klik op de tekst die u wilt veranderen. Er opent een venster met de tekst.
+4. Pas de tekst aan en klik op **Opslaan**.
+
+In grote titels kunt u woorden **schuin en roze** maken: selecteer de woorden en
+klik op **Roze accent**.
 
 ## Een foto vervangen
 
-1. Klik bij de foto op **Kies een andere afbeelding** en upload de nieuwe foto.
-2. Pas de **beschrijving** aan (wat staat er op de foto? Dit is voor slechtziende
-   bezoekers en Google) en eventueel het **bijschrift**.
-3. Kies bij **Uitsnede** welk deel zichtbaar moet blijven (midden, boven of onder).
-4. Publiceer. De website maakt de foto automatisch kleiner en sneller.
+1. Klik op de foto op uw website, of ga naar **Foto's** en klik op **Foto vervangen**.
+2. Klik op **Bestand kiezen** en kies een foto van uw telefoon of computer.
+   U kunt een foto ook in het vak slepen.
+3. Wacht tot er staat: *Foto is klaar*.
+4. Klik in het voorbeeld op het belangrijkste deel van de foto (bijvoorbeeld de nagels).
+   Dat deel blijft altijd zichtbaar.
+5. Beschrijf kort wat er op de foto staat.
+6. Klik op **Opslaan**. Wilt u het eerst op de pagina zien? Klik dan op
+   **Voorbeeld bekijken** en daarna bovenaan op **Wijzigingen opslaan**.
 
-Tip: staande foto's werken het best in de galerij. Upload alleen foto's waarvoor de
-klant toestemming heeft gegeven. Uw originele foto wordt bewaard in de opslag van de
-website (GitHub), die openbaar is: zet bij voorkeur de locatie van foto's uit op uw
-telefoon.
+Grote foto's worden automatisch kleiner gemaakt, en de locatie uit de foto wordt
+verwijderd. Gebruik alleen foto's waarvoor de klant toestemming heeft gegeven.
 
-## Prijzen
+## Een prijs aanpassen
 
-- **Prijs**: de prijs voor korte nagels, of de enige prijs. 0 betekent gratis.
-- **Prijs medium**: leeg laten als kort en medium hetzelfde kosten.
-- **Handbehandeling**: aangevinkt = deze prijs stijgt automatisch bij de
-  prijswijziging (nu: € 2,50 per 1 januari 2027). Tot die datum ziet de website
-  de huidige prijzen met een aankondiging.
+1. Ga naar **Prijslijst** (of klik op een prijs op uw website).
+2. Klik op **Prijs aanpassen** bij de prijs die u wilt veranderen.
+3. Vul de nieuwe prijs in, bijvoorbeeld *52,50*.
+4. Kies wanneer de prijs ingaat:
+   - **Direct**: de prijs verandert meteen op uw website.
+   - **Vanaf 1 januari 2027**: tot die datum blijft de oude prijs staan.
+5. Klik op **Opslaan**.
 
-## Wat u niet hier aanpast
+In de prijslijst ziet u bij elke behandeling twee prijzen: **Nu** en
+**Vanaf 1 januari 2027**. Daarnaast staat:
 
-Telefoonnummer, e-mailadres, adres en openingstijden: vraag de ontwikkelaar.
+- *Automatisch +€ 2,50*: de prijs gaat op 1 januari vanzelf omhoog.
+- *Zelf ingepland*: u heeft zelf een nieuwe prijs gekozen.
+- *Geen verhoging*: de prijs blijft gelijk.
+
+Met **Aanpassen** in de rechterkolom kiest u wat er op 1 januari 2027 gebeurt.
+
+## Opslaan
+
+Rechtsboven ziet u altijd hoe het ervoor staat:
+
+- **Alles is opgeslagen**: er is niets meer te doen.
+- **Niet-opgeslagen wijzigingen**: klik op **Wijzigingen opslaan**.
+- **Wijzigingen worden opgeslagen...**: even wachten.
+- **Wijzigingen opgeslagen!**: klaar. Na ongeveer een minuut staat het op uw website.
+
+Op het **Overzicht** ziet u wanneer uw website helemaal is bijgewerkt.
+
+## Wachtwoord vergeten of wijzigen?
+
+Neem contact op met uw websitebouwer. Die stelt een nieuw wachtwoord voor u in.
 
 ## Iets misgegaan?
 
-Elke wijziging wordt bewaard. De ontwikkelaar kan een eerdere versie altijd
-terugzetten.
+Elke wijziging wordt bewaard. Uw websitebouwer kan een eerdere versie altijd terugzetten.

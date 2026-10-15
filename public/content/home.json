@@ -5,7 +5,8 @@
     "text": "Even tijd voor uzelf. Persoonlijke nagelverzorging in de rustige salon aan huis van Marjon van Rossum.",
     "photo": {
       "src": "/assets/20260617_215744-1440.webp",
-      "alt": "Roze nagels met verfijnde bloemen nail art, gemaakt bij Marli Nails"
+      "alt": "Roze nagels met verfijnde bloemen nail art, gemaakt bij Marli Nails",
+      "focus": "center"
     }
   },
   "welcome": {
@@ -13,32 +14,94 @@
     "lead": "Een fijne plek voor uw nagels.\nEn even helemaal voor uzelf.",
     "text": "Ik ben Marjon van Rossum en woon al sinds 1985 in Almere. In mijn salon aan huis werk ik met veel liefde, geduld en persoonlijke aandacht. Ik werk met de professionele producten van Magnetic.",
     "facts": [
-      { "title": "Alle tijd voor u", "text": "Een nagelbehandeling duurt 1,5 tot 2 uur." },
-      { "title": "Kort & medium", "text": "Verzorging die past bij uw natuurlijke nagels." },
-      { "title": "Hygiënisch werken", "text": "Voor elke klant een nieuwe set vijlen." },
-      { "title": "Professionele aandacht", "text": "Aangesloten bij het NAIL register." }
+      {
+        "title": "Alle tijd voor u",
+        "text": "Een nagelbehandeling duurt 1,5 tot 2 uur."
+      },
+      {
+        "title": "Kort & medium",
+        "text": "Verzorging die past bij uw natuurlijke nagels."
+      },
+      {
+        "title": "Hygiënisch werken",
+        "text": "Voor elke klant een nieuwe set vijlen."
+      },
+      {
+        "title": "Professionele aandacht",
+        "text": "Aangesloten bij het NAIL register."
+      }
     ]
   },
   "treatments": {
     "title": "Mooi tot in de *vingertoppen.*",
     "intro": "Kies een behandeling om de prijzen te bekijken. Marli Nails verzorgt korte nagels en nagels met een medium lengte.",
     "cards": [
-      { "name": "Manicure", "text": "Verwen uw handen met een verzorgende manicurebehandeling.", "photo": "/assets/20211111_160925-500x500.jpg" },
-      { "name": "Teennagels", "text": "Mooi verzorgde, gelakte teennagels. Cosmetische teennagelverzorging, geen medische pedicure.", "photo": "/pedicure%20marli.jpg" },
-      { "name": "Nagel­behandelingen", "text": "Laat uw nagels verzorgen en omtoveren tot prachtige blikvangers.", "photo": "/assets/20260327_122338-1440.webp" },
-      { "name": "Nail Art", "text": "Geef uw nagels een persoonlijke uitstraling met creatieve nail art.", "photo": "/assets/20260318_214033-1440.webp" }
+      {
+        "name": "Manicure",
+        "text": "Verwen uw handen met een verzorgende manicurebehandeling.",
+        "photo": "/assets/20211111_160925-500x500.jpg",
+        "focus": "center"
+      },
+      {
+        "name": "Teennagels",
+        "text": "Mooi verzorgde, gelakte teennagels. Cosmetische teennagelverzorging, geen medische pedicure.",
+        "photo": "/pedicure%20marli.jpg",
+        "focus": "center"
+      },
+      {
+        "name": "Nagel­behandelingen",
+        "text": "Laat uw nagels verzorgen en omtoveren tot prachtige blikvangers.",
+        "photo": "/assets/20260327_122338-1440.webp",
+        "focus": "center"
+      },
+      {
+        "name": "Nail Art",
+        "text": "Geef uw nagels een persoonlijke uitstraling met creatieve nail art.",
+        "photo": "/assets/20260318_214033-1440.webp",
+        "focus": "center"
+      }
     ]
   },
   "gallery": {
     "title": "Kleine details.\n*Een eigen karakter.*",
     "intro": "Van ingetogen tot kleurrijk. Een selectie van echte nagels uit de salon, met aandacht gemaakt.",
     "photos": [
-      { "src": "/assets/20260210_223244-1440.webp", "alt": "Blauwe en roze nagels met marmeraccenten", "caption": "Blauw & roze marmer", "focus": "center" },
-      { "src": "/assets/20260313_163813-1440.webp", "alt": "Plumkleurige en zachtroze nagels met een handgeschilderd takje", "caption": "Plum & handgeschilderd takje", "focus": "center" },
-      { "src": "/assets/20260108_214645-1440.webp", "alt": "Donkerblauwe nagels met een subtiel structuurpatroon", "caption": "Diepblauw met structuur", "focus": "center" },
-      { "src": "/assets/20260723_204906-1440.webp", "alt": "Rode nagels met handgeschilderde klaprozen op een witte basis", "caption": "Rood & klaprozen", "focus": "center" },
-      { "src": "/assets/20211111_160344-1440.webp", "alt": "Waaier met gelpolishkleuren van Magnetic in de salon", "caption": "Kleurenwaaier in de salon", "focus": "center" },
-      { "src": "/assets/20260521_150616-1440.webp", "alt": "Turquoise glanzende nagels met paarse bloemen", "caption": "Turquoise met bloemen", "focus": "center" }
+      {
+        "src": "/assets/20260210_223244-1440.webp",
+        "alt": "Blauwe en roze nagels met marmeraccenten",
+        "caption": "Blauw & roze marmer",
+        "focus": "center"
+      },
+      {
+        "src": "/assets/20260313_163813-1440.webp",
+        "alt": "Plumkleurige en zachtroze nagels met een handgeschilderd takje",
+        "caption": "Plum & handgeschilderd takje",
+        "focus": "center"
+      },
+      {
+        "src": "/assets/20260108_214645-1440.webp",
+        "alt": "Donkerblauwe nagels met een subtiel structuurpatroon",
+        "caption": "Diepblauw met structuur",
+        "focus": "center"
+      },
+      {
+        "src": "/assets/20260723_204906-1440.webp",
+        "alt": "Rode nagels met handgeschilderde klaprozen op een witte basis",
+        "caption": "Rood & klaprozen",
+        "focus": "center"
+      },
+      {
+        "src": "/assets/20211111_160344-1440.webp",
+        "alt": "Waaier met gelpolishkleuren van Magnetic in de salon",
+        "caption": "Kleurenwaaier in de salon",
+        "focus": "center"
+      },
+      {
+        "src": "/assets/20260521_150616-1440.webp",
+        "alt": "Turquoise glanzende nagels met paarse bloemen",
+        "caption": "Turquoise met bloemen",
+        "focus": "center"
+      }
     ]
   },
   "booking": {
