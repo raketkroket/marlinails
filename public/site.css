@@ -550,3 +550,20 @@ dialog.lb::backdrop{background:rgba(24,20,18,.94)}
 @media (prefers-reduced-motion:reduce){
   .hero-detail img,.hero-ctas .btn-pink{transition:none!important;transform:none!important}
 }
+
+/* Custom editorial desktop rails and asymmetrical hero detailing. */
+@media(min-width:1440px){
+  .hero{position:relative;isolation:isolate}
+  .hero::before{content:"";position:absolute;z-index:-1;left:50%;top:0;transform:translateX(-50%);width:min(100%,1760px);height:100%;pointer-events:none;background:radial-gradient(ellipse 33% 45% at 76% 45%,rgba(200,19,106,.048),transparent 90%)}
+  .hero-rail{position:absolute;z-index:2;top:72px;bottom:82px;width:clamp(35px,5.3vw,96px);display:flex;align-items:center;gap:22px;writing-mode:vertical-rl;pointer-events:none;color:#93877f;font:600 10px/1.1 var(--sans);letter-spacing:.16em}
+  .hero-rail-left{left:clamp(10px,2.5vw,45px);transform:rotate(180deg)}
+  .hero-rail-right{right:clamp(10px,2.5vw,45px)}
+  .rail-line{width:1px;background:linear-gradient(to bottom,transparent,rgba(176,78,122,.42),transparent);flex:1;max-height:160px}
+  .rail-index{color:var(--pink-text);letter-spacing:.22em}
+  .hero-grid{position:relative}
+  .hero-grid::before{content:"";position:absolute;top:46px;left:var(--pad);width:46px;height:1px;background:var(--pink);opacity:.55}
+  .hero-grid::after{content:"";position:absolute;right:var(--pad);bottom:4px;width:76px;height:76px;border-bottom:1px solid rgba(200,19,106,.25);border-right:1px solid rgba(200,19,106,.25);border-radius:0 0 12px 0;pointer-events:none}
+  .hero-copy::before{content:"MARLI  /  ATELIER";position:absolute;left:0;top:-27px;font:600 10px var(--sans);letter-spacing:.2em;color:#a48b98}
+}
+@media(max-width:1439px){.hero-rail{display:none}}
+@media(min-width:1024px) and (max-width:1439px){.hero{background-image:radial-gradient(ellipse at 93% 57%,rgba(200,19,106,.035),transparent 42%)}}
