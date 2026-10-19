@@ -191,6 +191,8 @@ $('#prods').innerHTML=C.products.map((c,i)=>`<section class="pcat" aria-labelled
 /* Over */
 $('#tl').innerHTML=C.timeline.map(([y,h,p],i)=>`<li><span class="yr" data-edit="over.story.timeline.${i}.period">${esc(y)}</span><div><h3 data-edit="over.story.timeline.${i}.title">${esc(h)}</h3><p data-edit="over.story.timeline.${i}.text">${esc(p)}</p></div></li>`).join('');
 $('#edu').innerHTML=C.education.map(([h,p],i)=>`<li><span class="edu-n" aria-hidden="true">0${i+1}</span><h3 data-edit="over.education.items.${i}.title">${esc(h)}</h3><p data-edit="over.education.items.${i}.text">${esc(p)}</p></li>`).join('');
+/* Quote band on the homepage: Marjon's own words from "Zo werk ik". */
+if(C.values[0]){const q=$('#quote');q.textContent=C.values[0][1];q.dataset.edit='over.values.items.0.text';}
 $('#vals').innerHTML=C.values.map(([h,p],i)=>`<li><h3 data-edit="over.values.items.${i}.title">${esc(h)}</h3><p data-edit="over.values.items.${i}.text">${esc(p)}</p></li>`).join('');
 $('#regIntro').textContent=C.register.intro;
 $('#regList').innerHTML=C.register.points.map((p,i)=>`<li data-edit="over.register.points.${i}">${esc(p)}</li>`).join('');

@@ -457,3 +457,43 @@ dialog.lb::backdrop{background:rgba(24,20,18,.94)}
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
 @media (max-width:599px){.wide-only{display:none}}
+
+/* =====================================================================
+   A little more life: one rich colour block, a photo collage in the hero,
+   Marjon's own words in dusty rose, warmer accent, soft hover tints.
+   ===================================================================== */
+:root{--accent:#a83f68;--accent-dk:#8a3155;--aubergine:#3a1e29;--rose:#d9abba}
+
+/* Hero collage */
+.hero-figure{position:relative}
+.hero-detail{position:absolute;left:-12px;bottom:-28px;width:38%;aspect-ratio:3/4;overflow:hidden;border:8px solid var(--ivory);background:var(--stone)}
+.hero-detail img{width:100%;height:100%;object-fit:cover}
+@media (min-width:1024px){.hero-detail{left:-18%;bottom:-40px;width:42%}}
+@media (prefers-reduced-motion:no-preference){.hero-detail{animation:maskDown 1.4s var(--ease) .45s both}}
+
+/* Behandelingen: aubergine, the plum of the nails in the hero */
+.treatments{background:var(--aubergine);color:var(--ivory)}
+.treatments h2,.treatments .card h3{color:var(--ivory)}
+.treatments h2 em,.treatments .treat-number{color:#e9adc4}
+.treatments .section-label,.treatments .treat-intro p,.treatments .card p,.treatments .treat-foot{color:rgba(246,242,236,.8)}
+.treatments .section-number{color:#e9adc4}
+.treatments .tlink,.treatments .card-f .price,.treatments .treat-foot a{color:var(--ivory)}
+.treatments .tlink:hover{color:#e9adc4}
+.treatments .cards{border-top-color:rgba(246,242,236,.6)}
+.treatments .cards li{border-bottom-color:rgba(246,242,236,.18)}
+.treatments .card-f .go{color:#e9adc4}
+.treatments .card:hover h3{color:#e9adc4}
+.treatments .card{transition:background .4s var(--ease)}
+.treatments :focus-visible{outline-color:var(--ivory)}
+.treatments .ph{background:#4a2a35}
+@media (hover:hover) and (min-width:860px){
+  .treatments .card{margin:0 -20px;padding-left:20px;padding-right:20px}
+  .treatments .card:hover{background:rgba(246,242,236,.06)}
+}
+
+/* Quote band */
+.quote{background:var(--rose);padding:clamp(72px,9vw,140px) 0}
+.quote blockquote{margin:0 auto;max-width:1100px;text-align:center}
+.quote p{margin:0 auto 28px;max-width:none;font:italic 400 clamp(2.1rem,5.6vw,4.6rem)/1.08 var(--display);letter-spacing:-.01em;color:var(--ink)}
+.quote p::before{content:"\201C"}.quote p::after{content:"\201D"}
+.quote footer{font:600 12px/1.4 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
