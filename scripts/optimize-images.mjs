@@ -37,6 +37,15 @@ for (const name of sources) {
   }
 }
 
+// The desktop hero shows its photo across the full screen width: a sharper 2400 px version.
+for (const name of ['20260313_163813.jpg']) {
+  const output = name.replace('.jpg', '-2400.webp');
+  const buffer = await sharp(file(name)).rotate().resize({ width: 2400, withoutEnlargement: true }).webp({ quality: 74 }).toBuffer();
+  if (buffer.length > 700_000) throw new Error(`${output} exceeds the 700 KB hero image budget.`);
+  await writeFile(new URL(`assets/${output}`, publicDir), buffer);
+  console.log(`${output}: ${(buffer.length / 1024).toFixed(0)} KB`);
+}
+
 // Social sharing preview (Open Graph): 1200×630, logo on cream beside a salon photograph.
 const sharePhoto = await sharp(file('20260617_215744.jpg')).rotate()
   .resize({ width: 600, height: 630, fit: 'cover', position: 'centre' }).toBuffer();
