@@ -153,11 +153,11 @@ const serviceFrom=(s,future)=>{
   return `Vanaf ${eurShort(Math.min(...rows.map(r=>[].concat(priceOf(r,future))[0])))}${s.suffix||''}`;
 };
 
-$('#cards').innerHTML=C.services.map((s,i)=>`<li><a class="card" href="#/prijslijst/${s.to}"><div class="ph reveal" data-card="${i}" data-edit-img="home.treatments.cards.${i}.photo"></div><div class="card-b"><span class="treat-number" aria-hidden="true">0${i+1}</span><h3 data-edit="home.treatments.cards.${i}.name">${esc(s.name)}</h3><p data-edit="home.treatments.cards.${i}.text">${esc(s.text)}</p><div class="card-f"><span class="price">${esc(serviceFrom(s,changeActive))}</span><span class="go">Bekijk prijzen<span aria-hidden="true">↗</span></span></div></div></a></li>`).join('');
+$('#cards').innerHTML=C.services.map((s,i)=>`<li><a class="card" href="#/prijslijst/${s.to}"><div class="ph reveal" data-card="${i}" data-edit-img="home.treatments.cards.${i}.photo"></div><div class="card-b"><span class="treat-number" aria-hidden="true">0${i+1}</span><h3 data-edit="home.treatments.cards.${i}.name">${esc(s.name)}</h3><p data-edit="home.treatments.cards.${i}.text">${esc(s.text)}</p><div class="card-f"><span class="price">${esc(serviceFrom(s,changeActive))}</span><span class="go">Bekijk prijzen<span aria-hidden="true">→</span></span></div></div></a></li>`).join('');
 $$('[data-card]').forEach(el=>{fill(el,{...C.services[+el.dataset.card].img,alt:''},{ratio:false});el.setAttribute('aria-hidden','true')});
 $('#treatFoot').textContent=!PC?`Prijzen geldig vanaf ${C.pricesSince}.`:changeActive?`Prijzen geldig vanaf ${PC.label}.`:`Prijzen geldig t/m ${PC.until}. Per ${PC.label} gelden nieuwe tarieven voor handbehandelingen.`;
 
-$('#gal').innerHTML=C.gallery.map((g,i)=>`<figure><button type="button" data-i="${i}" aria-label="Vergroot foto: ${esc(g.caption)}"><div class="ph reveal" data-g="${i}" data-edit-img="home.gallery.photos.${i}"></div><span class="gallery-zoom" aria-hidden="true">↗</span></button><figcaption><span class="photo-index" aria-hidden="true">0${i+1}</span><span data-edit="home.gallery.photos.${i}.caption">${esc(g.caption)}</span></figcaption></figure>`).join('');
+$('#gal').innerHTML=C.gallery.map((g,i)=>`<figure><button type="button" data-i="${i}" aria-label="Vergroot foto: ${esc(g.caption)}"><div class="ph reveal" data-g="${i}" data-edit-img="home.gallery.photos.${i}"></div><span class="gallery-zoom" aria-hidden="true">+</span></button><figcaption><span class="photo-index" aria-hidden="true">0${i+1}</span><span data-edit="home.gallery.photos.${i}.caption">${esc(g.caption)}</span></figcaption></figure>`).join('');
 $$('[data-g]').forEach(el=>{const g=C.gallery[+el.dataset.g];fill(el,{...g,label:g.caption},{ratio:false})});
 
 

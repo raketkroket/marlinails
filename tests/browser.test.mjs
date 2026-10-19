@@ -18,7 +18,7 @@ after(async () => {
 });
 
 const pages = ['home', 'prijslijst', 'producten', 'over', 'contact'];
-test('rose glass controls preserve readable fallbacks and reduced motion', async () => {
+test('studio design system: charcoal squared buttons, no glass, quiet motion', async () => {
   const page = await newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
   await navigate(page, 'home');
   const style = await page.locator('.hero .btn-pink').evaluate(el => ({
@@ -27,50 +27,34 @@ test('rose glass controls preserve readable fallbacks and reduced motion', async
     radius: getComputedStyle(el).borderRadius,
     transition: getComputedStyle(el).transitionDuration
   }));
-  assert.equal(style.background, 'rgb(173, 45, 103)');
-  assert.equal(style.color, 'rgb(255, 255, 255)');
-  assert.equal(style.radius, '999px');
-  assert.equal(style.transition, '0s');
-  assert.equal(await page.locator('.book').evaluate(el =>
-    getComputedStyle(el).backgroundColor), 'rgb(222, 208, 194)');
-  assert.ok(await page.locator('.hdr').evaluate(el =>
-    getComputedStyle(el).backdropFilter.includes('blur')));
-  assert.equal(await page.locator('.hdr').evaluate(el =>
-    getComputedStyle(el).backgroundColor), 'rgba(248, 244, 238, 0.38)');
-  const session = await page.context().newCDPSession(page);
-  await session.send('Emulation.setEmulatedMedia', { features: [
-    { name: 'prefers-reduced-transparency', value: 'reduce' },
-    { name: 'prefers-reduced-motion', value: 'reduce' }
-  ] });
-  for (const selector of ['.hdr', '.actionbar', '.mmenu']) {
-    const fallback = await page.locator(selector).evaluate(el => ({
-      background: getComputedStyle(el).backgroundColor,
-      filter: getComputedStyle(el).backdropFilter
-    }));
-    assert.equal(fallback.background, 'rgb(248, 244, 238)');
-    assert.equal(fallback.filter, 'none');
-  }
+  assert.deepEqual(style, { background: 'rgb(36, 32, 30)', color: 'rgb(246, 242, 236)', radius: '2px', transition: '0s' });
+  assert.equal(await page.locator('body').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(246, 242, 236)');
+  assert.equal(await page.locator('.book').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(239, 226, 221)');
+  assert.equal(await page.locator('.hdr').evaluate(el => getComputedStyle(el).backdropFilter), 'none');
+  assert.equal(await page.locator('.actionbar').count(), 0, 'no floating booking bar');
+  // One display face for the brand and headings, one sans for reading.
+  assert.match(await page.locator('.hero-brand').evaluate(el => getComputedStyle(el).fontFamily), /Instrument Serif/);
+  assert.match(await page.locator('.hero-text').evaluate(el => getComputedStyle(el).fontFamily), /DM Sans/);
   await page.close();
 });
 
-test('mobile glass header and booking dock float inside viewport edges', async () => {
+test('mobile header shows only the logo and a menu button; booking lives in the menu', async () => {
   for (const width of [320, 390, 820]) {
     const page = await newPage({ viewport: { width, height: 740 }, reducedMotion: 'reduce' });
     await navigate(page, 'home');
-    await page.evaluate(() => scrollTo(0, 400));
-    for (const selector of ['.hdr', '.actionbar']) {
-      const bounds = await page.locator(selector).boundingBox();
-      assert.ok(bounds.x >= 12 && bounds.x + bounds.width <= width - 12);
-      assert.ok(bounds.y >= 12 && bounds.y + bounds.height <= 728);
-      assert.ok(await page.locator(selector).evaluate(el =>
-        parseFloat(getComputedStyle(el).borderRadius) >= 24));
-    }
+    assert.equal(await page.locator('.hdr .logo').isVisible(), true);
+    assert.equal(await page.locator('#menuBtn').isVisible(), true);
+    for (const hidden of ['.nav', '.hdr-book', '.hdr-tel']) assert.equal(await page.locator(hidden).isVisible(), false, hidden);
+    const header = await page.locator('.hdr').boundingBox();
+    assert.ok(header.x === 0 && header.width === width && header.height <= 82);
     await page.locator('#menuBtn').click();
-    assert.equal(await page.locator('.actionbar').isVisible(), false);
+    const booking = page.locator('#mmenu .btn[href="#/contact"]');
+    assert.equal(await booking.isVisible(), true);
     const menu = await page.locator('#mmenu').boundingBox();
-    assert.ok(menu.y >= 100 && menu.y + menu.height <= 728);
-    await page.keyboard.press('Escape');
-    assert.equal(await page.locator('.actionbar').isVisible(), true);
+    assert.ok(menu.y >= header.y + header.height - 1 && menu.y + menu.height <= 740);
+    await booking.click();
+    await page.locator('[data-view="contact"].on').waitFor();
+    assert.equal(await page.locator('#menuBtn').getAttribute('aria-expanded'), 'false');
     await page.close();
   }
 });
@@ -121,15 +105,19 @@ test('client preview keeps desktop text readable and photo details uncropped', a
   await page.close();
 });
 
-test('mobile contact fields get space without the floating dock covering them', async () => {
+test('mobile contact fields are never covered by fixed elements', async () => {
   const page = await newPage({ viewport: { width: 390, height: 500 }, reducedMotion: 'reduce' });
   await navigate(page, 'contact');
-  for (const selector of ['#f-name', '#f-mail', '#f-tel', '#f-msg']) {
+  for (const selector of ['#f-name', '#f-mail', '#f-tel', '#f-msg', '#cform button']) {
     await page.locator(selector).focus();
-    assert.equal(await page.locator('.actionbar').isVisible(), false);
+    await page.locator(selector).scrollIntoViewIfNeeded();
+    const covered = await page.locator(selector).evaluate(el => {
+      const box = el.getBoundingClientRect();
+      const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+      return !(hit === el || el.contains(hit));
+    });
+    assert.equal(covered, false, selector);
   }
-  await page.locator('.cform button').focus();
-  assert.equal(await page.locator('.actionbar').isVisible(), true);
   await page.close();
 });
 
@@ -164,13 +152,15 @@ for (const [label, width, height] of [
       assert.deepEqual(audit.violations.map(v => ({
         rule: v.id, elements: v.nodes.map(n => n.target)
       })), [], `${label}: ${name}`);
-      const sizes = await page.locator('.view.on .btn, .ftr a, #menuBtn, .nav a, .actionbar a')
+      const sizes = await page.locator('.view.on .btn, .ftr a, #menuBtn, .nav a, .hdr-book')
         .evaluateAll(elements => elements.filter(el => el.getClientRects().length && !el.closest('[inert]'))
           .map(el => ({ text: el.textContent.trim() || el.getAttribute('aria-label'),
             width: el.getBoundingClientRect().width, height: el.getBoundingClientRect().height })));
       assert.deepEqual(sizes.filter(size => size.width < 44 || size.height < 44), [], `${name}: touch targets`);
-      const bookingVisible = await page.locator('.hdr-book').isVisible() || await page.locator('.actionbar .btn-pink').isVisible();
-      assert.equal(bookingVisible, true, 'An appointment action stays visible at every breakpoint');
+      // Booking is always one step away: in the header on wide screens, in the menu otherwise.
+      const bookingReachable = await page.locator('.hdr-book').isVisible() ||
+        (await page.locator('#menuBtn').isVisible() && await page.locator('#mmenu .btn[href="#/contact"]').count() === 1);
+      assert.equal(bookingReachable, true, 'Booking stays one step away at every breakpoint');
     }
     assert.deepEqual(errors, []);
     await page.close();
@@ -196,7 +186,12 @@ test('original images and fonts load locally, with no third-party requests', asy
   const sources = await page.locator('.view.on img').evaluateAll(images => images.map(image => image.src));
   assert.equal(new Set(sources).size, sources.length, 'Homepage photographs must not repeat');
   assert.equal(await page.evaluate(() => document.fonts.check('18px "DM Sans"')), true);
-  assert.equal(await page.evaluate(() => document.fonts.check('48px "DM Serif Display"')), true);
+  // Display and body fonts are self-hosted WOFF2 files and really load.
+  const loaded = await page.evaluate(async () => {
+    await document.fonts.ready;
+    return [...document.fonts].filter(face => face.status === 'loaded').map(face => face.family.replace(/["']/g, ''));
+  });
+  for (const family of ['Instrument Serif', 'DM Sans']) assert.ok(loaded.includes(family), family);
   assert.deepEqual(external, []);
   await page.close();
 });
@@ -452,11 +447,13 @@ test('metadata targets the final domain and each page sets its own title and des
   await page.close();
 });
 
-test('mobile gallery scrolls horizontally inside its row and opens every photo', async () => {
+test('gallery uses an editorial rhythm on phones and every photo opens', async () => {
   const page = await newPage({ viewport: { width: 375, height: 812 }, reducedMotion: 'reduce' });
   await navigate(page, 'home');
-  assert.ok(await page.locator('#gal').evaluate(el => el.scrollWidth > el.clientWidth), 'gallery scrolls');
-  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'page does not');
+  const widths = await page.locator('.gal figure').evaluateAll(figures => figures.map(f => Math.round(f.getBoundingClientRect().width)));
+  assert.ok(widths[0] > widths[1] * 1.8, `first photo spans the row: ${widths}`);
+  assert.equal(widths[1], widths[2]);
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   await page.locator('.gal button').last().scrollIntoViewIfNeeded();
   await page.locator('.gal button').last().click();
   assert.match(await page.locator('#lbCap').innerText(), /6 van 6/);

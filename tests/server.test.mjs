@@ -45,10 +45,10 @@ test('serves Dutch site with strict security headers', async () => {
 });
 
 test('serves scripts, fonts and images with correct MIME types; HEAD has no body', async () => {
-  for (const [file, mime] of [['/app.js', 'text/javascript'], ['/styles.css', 'text/css'],
+  for (const [file, mime] of [['/app.js', 'text/javascript'], ['/site.css', 'text/css'],
     ['/assets/logo.png', 'image/png'], ['/assets/20211111_160344.jpg', 'image/jpeg'],
     ['/assets/20260521_150616-640.webp', 'image/webp'],
-    ['/assets/font-0.ttf', 'font/ttf']]) {
+    ['/assets/instrumentserif.woff2', 'font/woff2']]) {
     const response = await request(file, 'HEAD');
     assert.equal(response.status, 200, file);
     assert.ok(response.headers['content-type'].startsWith(mime), file);
@@ -102,7 +102,7 @@ test('Vercel builds only dist and applies current production security headers', 
   for (const [name, value] of Object.entries(await securityHeaders({ https: true }))) {
     assert.equal(headers[name], value, name);
   }
-  for (const asset of ['/styles.css?version=deployment', '/editorial.css?version=deployment', '/app.js?version=deployment']) {
+  for (const asset of ['/site.css?version=deployment', '/app.js?version=deployment']) {
     assert.equal((await request(asset)).status, 200, asset);
   }
 });
@@ -140,7 +140,9 @@ test('responsive photographs meet resolution and payload budgets with no EXIF me
   for (const name of files) {
     const file = new URL(name, directory);
     const metadata = await sharp(await readFile(file)).metadata();
-    assert.equal(metadata.width, Number(name.match(/-(\d+)\.webp$/)[1]), name);
+    // Exact width, except that a smaller original is never enlarged (the new portrait is 1057 px).
+    const target = Number(name.match(/-(\d+)\.webp$/)[1]);
+    assert.ok(metadata.width === target || (target === 1440 && metadata.width >= 1000 && metadata.width < 1440), name);
     assert.ok((await stat(file)).size <= 400_000, name);
     assert.equal(metadata.exif, undefined, name);
   }

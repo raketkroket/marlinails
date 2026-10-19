@@ -7,9 +7,4 @@
 .hero-backdrop.mx-img::after{top:auto;bottom:90px;left:auto;right:24px}
 .mx-flash{animation:mxFlash 1.6s ease-out 2}
 @keyframes mxFlash{0%,100%{outline-color:transparent}40%{outline:3px solid #ad2d67;outline-offset:4px}}
-/* No sticky dock over the content while editing. */
-.actionbar{display:none!important}
-body{padding-bottom:0!important}
-/* The large homepage photo sits behind the hero text: let clicks reach it. */
-.hero::after,.hero .luxury-hero{pointer-events:none}
-.hero .luxury-hero .mx-edit,.hero .luxury-hero a,.hero .luxury-hero button{pointer-events:auto}
+/* The editor preview needs no extra layout changes: the site has no floating bars. */

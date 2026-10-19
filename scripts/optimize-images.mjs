@@ -23,7 +23,7 @@ for (const [name, size] of [['favicon-32.png', 32], ['apple-touch-icon.png', 180
 // Supplied 2026 originals (public/) and the earlier salon photos (public/assets/).
 const sources = [
   ...(await readdir(publicDir)).filter(name => /^2026\d{4}_\d{6}\.jpg$/.test(name)),
-  'assets/20211113_122901.jpg', 'assets/20211111_160344.jpg', 'assets/20211010_124909.jpg'
+  'marjon-portret.jpg', 'assets/20211111_160344.jpg', 'assets/20211010_124909.jpg'
 ];
 if (!sources.some(name => name.startsWith('2026'))) throw new Error('No supplied 2026 salon photographs found.');
 for (const name of sources) {

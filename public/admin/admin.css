@@ -254,3 +254,116 @@ dialog.panel[open]{animation:slideIn .3s var(--ease)}
 }
 .editor{grid-template-columns:minmax(0,1fr)}
 .editor-bar>*{min-width:0}
+
+/* =====================================================================
+   Boutique theme (matches the website): bordeaux, blush, cream,
+   Outfit display type with Great Vibes script accents.
+   ===================================================================== */
+:root{
+  --bg:#f8f4ee;--surface:#fffaf6;--blush:#f3d6dc;--blush-2:#f9e9ec;--pink-soft:#f9e1e8;
+  --pink:#ad2d67;--pink-dk:#8e2253;--plum:#4a1426;--wine:#4a1426;--wine-dk:#360d1b;--rose-lt:#f2a7c3;
+  --text:#3b2a2e;--muted:#6b565c;--line:rgba(74,20,38,.14);
+  --serif:"Outfit","Segoe UI",Arial,sans-serif;--script:"Great Vibes",cursive;
+}
+h1,h2,h3{font-family:var(--serif);font-weight:300;letter-spacing:-.03em;color:var(--wine)}
+h1 em,h2 em{font-family:var(--script);font-style:normal;font-weight:400;letter-spacing:0;color:var(--pink);font-size:1.15em}
+.btn{font-family:var(--serif);font-weight:500}
+.btn-primary{background:var(--pink)}
+.btn-primary .ico{width:30px;height:30px;padding:5px;margin:-4px 0 -4px -6px;border-radius:50%;background:#fff;color:var(--pink)}
+
+/* Login: photo with wordmark beside the form */
+.login{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0;padding:0;background:var(--bg)}
+.login-art{position:relative;align-self:stretch;justify-self:stretch;width:100%;min-height:100vh;overflow:hidden;background:var(--wine-dk)}
+.login-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.75}
+.login-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(54,13,27,.55),rgba(54,13,27,.2) 45%,rgba(54,13,27,.85))}
+.login-quote{position:absolute;z-index:1;left:48px;top:48px;margin:0;font:200 clamp(2rem,3.4vw,3.4rem)/1 var(--serif);letter-spacing:-.04em;color:var(--bg)}
+.login-quote em{font:400 1.2em var(--script);color:var(--rose-lt)}
+.login-card{justify-self:center;align-self:center;margin:32px;box-shadow:none;border:0;background:transparent}
+.login h1{font-size:clamp(2.4rem,3.4vw,3.2rem)}
+
+/* App chrome */
+.topbar{background:rgba(248,244,238,.9)}
+.sidenav{background:var(--wine);border-right:0}
+.sidenav a,.sidenav button{color:rgba(248,244,238,.86);font-family:var(--serif);font-weight:400}
+.sidenav a:hover,.sidenav button:hover{background:rgba(248,244,238,.1);color:#fff}
+.sidenav a[aria-current="page"]{background:var(--bg);color:var(--wine);box-shadow:none;font-weight:500}
+.sidenav button{color:rgba(248,244,238,.7)}
+.sidenav :focus-visible{outline-color:var(--rose-lt)}
+.welcome{background:var(--wine);border:0;color:var(--bg);overflow:hidden}
+.welcome h1{color:var(--bg);font-weight:200;font-size:clamp(2.6rem,5vw,4.4rem)}
+.welcome h1 em{color:var(--rose-lt)}
+.welcome p{color:rgba(248,244,238,.88)}
+.welcome strong{color:#fff}
+.welcome .btn-soft{background:transparent;color:var(--bg);border-color:rgba(248,244,238,.45)}
+.welcome .btn-soft:hover{background:var(--bg);color:var(--wine)}
+.welcome :focus-visible{outline-color:var(--rose-lt)}
+.welcome .status-card{position:relative;z-index:1}
+.tile,.page-card,.photo-card,.price-group,.card{border-radius:24px}
+.tile .tile-icon{background:var(--blush);color:var(--wine)}
+.tile h2,.page-card h2{font-weight:300;font-size:1.7rem}
+.page-card .num{font:400 1.8rem var(--script)}
+.view-head h1{font-weight:200;font-size:clamp(2.4rem,4vw,3.6rem)}
+.price-group>h2{background:var(--wine);color:var(--bg);border:0}
+.panel-head h2{font-weight:300}
+.panel-kicker{font-family:var(--serif)}
+.editor-bar h1{font-weight:300}
+.page-tabs button[aria-pressed="true"],.device button[aria-pressed="true"]{background:var(--wine);border-color:var(--wine)}
+@media (max-width:900px){
+  .login{grid-template-columns:minmax(0,1fr)}
+  .login-art{min-height:260px;height:34svh}
+  .login-quote{left:22px;top:22px;font-size:2rem}
+  .login-card{margin:-28px 16px 32px;position:relative;z-index:2;background:var(--surface);border-radius:26px;box-shadow:var(--shadow-lift)}
+  .sidenav{background:var(--wine);border-top:0}
+  .sidenav a[aria-current="page"]{background:var(--bg)}
+}
+
+/* Calm: no decorative wordmarks; slightly heavier headings. */
+h1,h2,h3{font-weight:400}
+.welcome h1,.view-head h1{font-weight:300}
+
+/* =====================================================================
+   Studio system (matches the website): ivory and stone, charcoal,
+   Instrument Serif headings, muted rose as a sparing accent, squared edges.
+   ===================================================================== */
+:root{
+  --bg:#f6f2ec;--surface:#fbf9f6;--card:#fffdfa;--blush:#efe2dd;--pink-soft:#f3e6e9;
+  --pink:#a2486b;--pink-dk:#86385a;--plum:#24201e;--wine:#24201e;--wine-dk:#1a1715;--rose-lt:#e5b7c8;
+  --text:#36302d;--muted:#5f5751;--line:rgba(36,32,30,.16);
+  --serif:"Instrument Serif",Georgia,serif;--script:"Instrument Serif",Georgia,serif;
+  --r:4px;--r-lg:6px;--shadow:none;--shadow-lift:0 18px 40px -30px rgba(36,32,30,.45);
+}
+h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:-.01em}
+h1 em,h2 em{font-family:var(--serif);font-style:italic;font-size:1em;color:var(--pink)}
+.btn{font-family:var(--sans);font-weight:600;border-radius:2px}
+.btn-primary{background:var(--plum);border-color:var(--plum);box-shadow:none}
+.btn-primary:not([disabled]):hover{background:var(--pink-dk);border-color:var(--pink-dk)}
+.btn-primary .ico{background:transparent;color:inherit;padding:0;margin:0;width:20px;height:20px}
+.btn-soft{border-color:var(--plum)}
+.icon-btn{border-radius:2px}
+.field input,.field textarea,.rich{border:1px solid #d9cfc3;border-radius:2px}
+.login-card{border-radius:0}
+.login-quote{font-family:var(--serif);font-weight:400}
+.login-quote em{font:italic 400 1em var(--serif);color:var(--rose-lt)}
+.sidenav{background:var(--plum)}
+.sidenav a,.sidenav button{border-radius:2px}
+.sidenav a[aria-current="page"]{background:var(--bg);color:var(--plum)}
+.welcome{background:var(--plum);border-radius:4px}
+.welcome h1{font-weight:400}
+.welcome .btn-primary{background:var(--bg);color:var(--plum);border-color:var(--bg)}
+.welcome .btn-primary:hover{background:#fff;color:var(--plum)}
+.tile,.page-card,.photo-card,.price-group,.card,.status-card,.schedule-note{border-radius:4px;box-shadow:none}
+.tile:hover,.page-card:hover{box-shadow:var(--shadow-lift)}
+.tile .tile-icon{border-radius:2px;background:var(--blush);color:var(--plum)}
+.page-card .num{font:italic 400 1.6rem var(--serif);color:var(--pink)}
+.price-group>h2{background:var(--plum);color:var(--bg)}
+.badge{border-radius:2px}
+.choice{border-radius:2px;border-width:1px}
+.panel-inner{border-radius:0}
+.page-tabs button,.device button,.rich-tools button{border-radius:2px}
+.device{border-radius:2px}
+.frame{border-radius:4px}
+.frame.is-phone{border-radius:22px}
+@media (max-width:900px){.login-card{border-radius:6px}.panel-inner{border-radius:8px 8px 0 0}}
+.login-art{background:var(--plum)}
+.login-art img{opacity:.9}
+.login-art::after{background:linear-gradient(180deg,rgba(26,23,21,.55),rgba(26,23,21,0) 40%)}

@@ -22,7 +22,7 @@ await cp(publicDir, output, {
   recursive: true,
   // Full-size supplied originals stay in the repository; the site uses optimized copies.
   // Content JSON is bundled into content.js. Admin uploads are already resized WebP.
-  filter: source => !/[\\/](2026\d{4}_\d{6}\.jpg|Glossy Pink Marli Nails Logo\.png)$/.test(source) &&
+  filter: source => !/[\\/](2026\d{4}_\d{6}\.jpg|marjon-portret\.jpg|Glossy Pink Marli Nails Logo\.png)$/.test(source) &&
     !/[\\/]public[\\/]content([\\/]|$)/.test(source)
 });
 await writeFile(new URL('content.js', output), contentScript(await readContent(publicDir)));
