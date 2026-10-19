@@ -7,3 +7,4 @@ playwright-report/
 .env.*
 !.env.example
 .test-build/
+.vercel
