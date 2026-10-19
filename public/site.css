@@ -519,3 +519,34 @@ dialog.lb::backdrop{background:rgba(24,20,18,.94)}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
+
+
+/* Hero composition refinement: controlled photo crop and subtle tactile depth.
+   Desktop-only to preserve the approved mobile experience. */
+@media (min-width:1024px){
+  .hero-grid{column-gap:clamp(32px,3vw,54px)}
+  .hero-figure{isolation:isolate;min-height:560px;margin-bottom:28px}
+  .hero-backdrop{
+    width:81%;
+    aspect-ratio:0.94;
+    border-radius:47% 47% 14px 14px / 34% 34% 14px 14px;
+    box-shadow:0 32px 70px -38px rgba(47,29,36,.33),0 13px 30px -18px rgba(47,29,36,.18);
+  }
+  .hero-backdrop img{object-position:50% 33%}
+  .hero-detail{
+    left:-3%;bottom:14px;width:39%;aspect-ratio:1/1.04;
+    border:7px solid var(--ivory);
+    border-radius:15px;
+    box-shadow:0 26px 48px -22px rgba(43,25,31,.4),0 8px 17px -11px rgba(43,25,31,.21);
+    z-index:2;
+  }
+  .hero-detail img{object-position:50% 44%;transition:transform .75s var(--ease)}
+  .hero-figure:hover .hero-detail img{transform:scale(1.045)}
+  .hero-figure .sticker{left:6%;top:12%;z-index:3;box-shadow:0 15px 27px -16px rgba(65,15,40,.48)}
+  .hero-copy{position:relative;z-index:3}
+  .hero-ctas .btn-pink{box-shadow:0 13px 24px -13px rgba(155,14,76,.48);transition:background .3s var(--ease),box-shadow .3s var(--ease),transform .3s var(--ease)}
+  .hero-ctas .btn-pink:hover{box-shadow:0 19px 32px -14px rgba(155,14,76,.55);transform:translateY(-2px)}
+}
+@media (prefers-reduced-motion:reduce){
+  .hero-detail img,.hero-ctas .btn-pink{transition:none!important;transform:none!important}
+}
