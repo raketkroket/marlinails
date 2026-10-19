@@ -201,14 +201,15 @@ test('original images and fonts load locally, with no third-party requests', asy
   const external = [];
   page.on('request', request => { if (!request.url().startsWith(origin)) external.push(request.url()); });
   await navigate(page, 'home');
-  for (const image of await page.locator('.view.on img').all()) {
+  // Visible photos only: the small hero detail photo is a phones-and-tablets extra.
+  for (const image of await page.locator('.view.on img:visible').all()) {
     await image.scrollIntoViewIfNeeded();
     await image.evaluate(image => image.decode());
     assert.ok(await image.evaluate(image => image.naturalWidth > 0));
     const resolution = await image.evaluate(image => ({
       responsive: !!image.srcset, source: image.currentSrc, width: image.naturalWidth
     }));
-    if (resolution.responsive) assert.match(resolution.source, /-(640|1440)\.webp$/);
+    if (resolution.responsive) assert.match(resolution.source, /-(640|1440|2400)\.webp$/);
     else assert.ok(resolution.width >= 500);
   }
   assert.equal(await page.locator('.gal button').count(), 6);

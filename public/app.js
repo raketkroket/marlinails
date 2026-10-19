@@ -25,6 +25,8 @@ const SERVICE_LINKS=[
   {to:'afwerking',row:1,suffix:' per nagel'}
 ];
 const FOCUS={center:'50% 50%',top:'50% 25%',bottom:'50% 75%'};
+/* Photos that also have a 2400 px version (npm run images), for the full-width desktop hero. */
+const WIDE=new Set(['/assets/20260313_163813-1440.webp']);
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -37,7 +39,7 @@ const hasValue=v=>v!==null&&v!==undefined&&v!=='';
 function imgOf(src,alt,{sizes='(min-width:1180px) 440px, (min-width:600px) 45vw, 80vw',ratio='4:5',focus,label}={}){
   if(!src) return {srcs:[],alt,ratio,label};
   const img={srcs:[src],alt:alt||'',ratio,label,focus:FOCUS[focus]||(/^\d{1,3}% \d{1,3}%$/.test(focus||'')?focus:FOCUS.center)};
-  if(/-1440\.webp$/.test(src)){img.srcset=`${src.replace(/-1440\.webp$/,'-640.webp')} 640w, ${src} 1440w`;img.sizes=sizes}
+  if(/-1440\.webp$/.test(src)){img.srcset=`${src.replace(/-1440\.webp$/,'-640.webp')} 640w, ${src} 1440w`+(WIDE.has(src)?`, ${src.replace(/-1440\.webp$/,'-2400.webp')} 2400w`:'');img.sizes=sizes}
   return img;
 }
 const dutchDate=iso=>new Intl.DateTimeFormat('nl-NL',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${iso}T00:00:00Z`));

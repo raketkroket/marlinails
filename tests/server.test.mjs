@@ -136,14 +136,15 @@ test('production build and browser CSP hashes agree for Linux and Windows line e
 test('responsive photographs meet resolution and payload budgets with no EXIF metadata', async () => {
   const directory = new URL('../public/assets/', import.meta.url);
   const files = (await readdir(directory)).filter(name => name.endsWith('.webp'));
-  assert.equal(files.length, 22);
+  assert.equal(files.length, 23);
   for (const name of files) {
     const file = new URL(name, directory);
     const metadata = await sharp(await readFile(file)).metadata();
     // Exact width, except that a smaller original is never enlarged (the new portrait is 1057 px).
     const target = Number(name.match(/-(\d+)\.webp$/)[1]);
     assert.ok(metadata.width === target || (target === 1440 && metadata.width >= 1000 && metadata.width < 1440), name);
-    assert.ok((await stat(file)).size <= 400_000, name);
+    // The 2400 px full-width hero photo has its own, larger budget.
+    assert.ok((await stat(file)).size <= (target === 2400 ? 700_000 : 400_000), name);
     assert.equal(metadata.exif, undefined, name);
   }
 });
