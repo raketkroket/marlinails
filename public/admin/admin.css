@@ -367,3 +367,34 @@ h1 em,h2 em{font-family:var(--serif);font-style:italic;font-size:1em;color:var(-
 .login-art{background:var(--plum)}
 .login-art img{opacity:.9}
 .login-art::after{background:linear-gradient(180deg,rgba(26,23,21,.55),rgba(26,23,21,0) 40%)}
+
+/* =====================================================================
+   Marli system (matches the website, October 2026): warm off-white and
+   charcoal, Marli pink for actions, Bricolage Grotesque headings with an
+   occasional Instrument Serif italic word, softly rounded corners.
+   ===================================================================== */
+:root{
+  --bg:#f7f3ee;--surface:#fdfbf8;--card:#fffdfa;--blush:#efe8df;--pink-soft:#fbe3ee;
+  --pink:#c8136a;--pink-dk:#a80f58;--plum:#231f1d;--wine:#231f1d;--wine-dk:#171412;--rose-lt:#f49ac1;
+  --text:#3a3431;--muted:#615953;--line:rgba(35,31,29,.14);
+  --serif:"Bricolage Grotesque","Segoe UI",Roboto,Arial,sans-serif;--script:"Instrument Serif",Georgia,serif;
+  --r:10px;--r-lg:14px;
+}
+h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.025em}
+h1 em,h2 em,.login-quote em{font-family:var(--script);font-weight:400;font-style:italic;letter-spacing:-.01em;color:var(--pink)}
+.btn{font-family:var(--serif);border-radius:6px}
+.btn-primary{background:var(--pink);border-color:var(--pink)}
+.btn-primary:not([disabled]):hover{background:var(--pink-dk);border-color:var(--pink-dk)}
+.btn-soft{border-color:var(--line)}
+.btn-soft:hover{border-color:var(--pink);color:var(--pink)}
+.icon-btn,.page-tabs button,.device button,.rich-tools button,.choice,.badge,.device{border-radius:6px}
+.field input,.field textarea,.rich{border-radius:8px}
+.login-card{border-radius:14px}
+.login-quote{font-family:var(--serif);font-weight:600;letter-spacing:-.03em}
+.login-quote em{color:var(--rose-lt)}
+.sidenav a,.sidenav button{border-radius:8px}
+.welcome{border-radius:14px}
+.welcome h1 em{color:var(--rose-lt)}
+.tile,.page-card,.photo-card,.price-group,.card,.status-card,.schedule-note,.frame{border-radius:12px}
+.page-card .num{font:italic 400 1.6rem var(--script);color:var(--pink)}
+.price-group>h2{border-radius:12px 12px 0 0}

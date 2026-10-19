@@ -48,7 +48,7 @@ test('serves scripts, fonts and images with correct MIME types; HEAD has no body
   for (const [file, mime] of [['/app.js', 'text/javascript'], ['/site.css', 'text/css'],
     ['/assets/logo.png', 'image/png'], ['/assets/20211111_160344.jpg', 'image/jpeg'],
     ['/assets/20260521_150616-640.webp', 'image/webp'],
-    ['/assets/instrumentserif.woff2', 'font/woff2']]) {
+    ['/assets/bricolage-var.woff2', 'font/woff2']]) {
     const response = await request(file, 'HEAD');
     assert.equal(response.status, 200, file);
     assert.ok(response.headers['content-type'].startsWith(mime), file);

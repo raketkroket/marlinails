@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Nagelsalon Almere | Marli Nails</title>
 <meta name="description" content="Marli Nails is de nagelsalon aan huis van Marjon van Rossum in Almere. Persoonlijke aandacht, professionele nagelverzorging en een heerlijk verwenmoment. Uitsluitend op afspraak: bel 06 22889353.">
-<meta name="theme-color" content="#f8f4ee">
+<meta name="theme-color" content="#f7f3ee">
 <!-- Beoogd hoofddomein. Zie README, "Domein", voor de migratie van marlinails.vercel.app naar www.marlinails.nl. -->
 <link rel="canonical" href="https://www.marlinails.nl/">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
@@ -31,7 +31,7 @@
 </script>
 <link rel="preload" as="image" href="/assets/20260313_163813-1440.webp" imagesrcset="/assets/20260313_163813-640.webp 640w, /assets/20260313_163813-1440.webp 1440w" imagesizes="(min-width:1024px) 40vw, 100vw" fetchpriority="high">
 <link rel="stylesheet" href="/assets/fonts.css">
-<link rel="stylesheet" href="/site.css?v=studio-20261019">
+<link rel="stylesheet" href="/site.css?v=marli-20261019">
 </head>
 <body>
 
@@ -67,20 +67,17 @@
 <div class="view" data-view="home" data-title="Nagelsalon Almere | Marli Nails" data-description="Marli Nails is de nagelsalon aan huis van Marjon van Rossum in Almere. Persoonlijke aandacht, professionele nagelverzorging en een heerlijk verwenmoment. Uitsluitend op afspraak: bel 06 22889353.">
   <section class="hero" aria-labelledby="h-home">
     <div class="wrap hero-grid">
-      <div class="hero-meta">
-        <p class="hero-prelude" data-c="home.hero.prelude">Met aandacht gemaakt.</p>
-        <p class="hero-place"><span class="wide-only">Nagelstudio aan huis<br></span>Almere</p>
-      </div>
-      <p class="hero-brand" aria-hidden="true"><span class="line"><span>Marli</span></span><span class="line"><span><em>Nails</em></span></span></p>
-      <figure class="hero-figure">
-        <div class="hero-backdrop ph" data-img="hero" data-edit-img="home.hero.photo"></div>
-        <div class="hero-detail"><img src="/assets/20211010_124909-640.webp" srcset="/assets/20211010_124909-640.webp 640w, /assets/20211010_124909-1440.webp 1440w" sizes="(min-width:1024px) 200px, 34vw" width="640" height="480" alt="Nail art met kleine bloemen en glitter, gemaakt bij Marli Nails" loading="lazy" decoding="async"></div>
-      </figure>
+      <p class="hero-place"><span class="nail-mark" aria-hidden="true"></span>Nagelstudio aan huis in Almere</p>
       <div class="hero-copy">
         <h1 id="h-home" tabindex="-1" data-c-rich="home.hero.title">Mooi verzorgde<br>nagels. <em>Helemaal u.</em></h1>
         <p class="hero-text" data-c="home.hero.text">Even tijd voor uzelf. Persoonlijke nagelverzorging in de rustige salon aan huis van Marjon van Rossum.</p>
         <div class="hero-ctas"><a class="btn btn-pink" href="#/contact">Maak een afspraak<span class="btn-arrow" aria-hidden="true">→</span></a><a class="tlink" href="#/prijslijst">Bekijk de prijslijst</a></div>
       </div>
+      <figure class="hero-figure">
+        <div class="hero-backdrop ph" data-img="hero" data-edit-img="home.hero.photo"></div>
+        <div class="hero-detail"><img src="/assets/20211010_124909-640.webp" srcset="/assets/20211010_124909-640.webp 640w, /assets/20211010_124909-1440.webp 1440w" sizes="(min-width:1024px) 300px, 50vw" width="640" height="480" alt="Nail art met kleine bloemen en glitter, gemaakt bij Marli Nails" loading="lazy" decoding="async"></div>
+        <p class="hero-prelude sticker" data-c="home.hero.prelude">Met aandacht gemaakt.</p>
+      </figure>
       <a href="#h-welkom" data-scroll-welcome class="hero-scroll">Ontdek Marli Nails <span aria-hidden="true">↓</span></a>
     </div>
   </section>
@@ -95,50 +92,48 @@
 
   <section class="sec welkom" aria-labelledby="h-welkom">
     <div class="wrap welkom-grid">
-      <p class="section-label reveal"><span class="section-number" aria-hidden="true">01</span>Maak kennis</p>
-      <h2 id="h-welkom" class="reveal" data-c-rich="home.welcome.title">Geen haast.<br>Wel <em>alle aandacht.</em></h2>
       <figure class="welkom-img">
         <div class="ph reveal" data-img="about" data-edit-img="over.portrait"></div>
-        <figcaption><strong>Marjon van Rossum</strong><span>Nagelstyliste &amp; eigenaar</span></figcaption>
+        <figcaption class="sticker sticker-ink"><strong>Marjon van Rossum</strong> <span>Nagelstyliste &amp; eigenaar</span></figcaption>
       </figure>
-      <div class="welkom-copy reveal">
-        <p class="lead" data-c-rich="home.welcome.lead">Een fijne plek voor uw nagels.<br>En even helemaal voor uzelf.</p>
-        <p data-c="home.welcome.text">Ik ben Marjon van Rossum en woon al sinds 1985 in Almere. In mijn salon aan huis werk ik met veel liefde, geduld en persoonlijke aandacht. Ik werk met de professionele producten van Magnetic.</p>
-        <a class="tlink" href="#/over">Meer over Marjon</a>
+      <div class="welkom-main">
+        <p class="section-label reveal">Maak kennis</p>
+        <h2 id="h-welkom" class="reveal" data-c-rich="home.welcome.title">Geen haast.<br>Wel <em>alle aandacht.</em></h2>
+        <div class="welkom-copy reveal">
+          <p class="lead" data-c-rich="home.welcome.lead">Een fijne plek voor uw nagels.<br>En even helemaal voor uzelf.</p>
+          <p data-c="home.welcome.text">Ik ben Marjon van Rossum en woon al sinds 1985 in Almere. In mijn salon aan huis werk ik met veel liefde, geduld en persoonlijke aandacht. Ik werk met de professionele producten van Magnetic.</p>
+          <a class="tlink" href="#/over">Meer over Marjon</a>
+        </div>
+        <ul class="facts reveal" id="facts">
+          <li><strong>Alle tijd voor u</strong><span>Een nagelbehandeling duurt 1,5 tot 2 uur.</span></li>
+          <li><strong>Kort &amp; medium</strong><span>Verzorging die past bij uw natuurlijke nagels.</span></li>
+          <li><strong>Hygiënisch werken</strong><span>Voor elke klant een nieuwe set vijlen.</span></li>
+          <li><strong>Professionele aandacht</strong><span>Aangesloten bij het NAIL register.</span></li>
+        </ul>
       </div>
-      <ul class="facts reveal" id="facts">
-        <li><strong>Alle tijd voor u</strong><span>Een nagelbehandeling duurt 1,5 tot 2 uur.</span></li>
-        <li><strong>Kort &amp; medium</strong><span>Verzorging die past bij uw natuurlijke nagels.</span></li>
-        <li><strong>Hygiënisch werken</strong><span>Voor elke klant een nieuwe set vijlen.</span></li>
-        <li><strong>Professionele aandacht</strong><span>Aangesloten bij het NAIL register.</span></li>
-      </ul>
     </div>
   </section>
 
   <section class="sec treatments" aria-labelledby="h-treat">
     <div class="wrap treat-layout">
-      <p class="section-label reveal"><span class="section-number" aria-hidden="true">02</span>Behandelingen</p>
       <div class="treat-intro reveal">
+        <p class="section-label">Behandelingen</p>
         <h2 id="h-treat" data-c-rich="home.treatments.title">Mooi tot in de <em>vingertoppen.</em></h2>
-        <div>
-          <p data-c="home.treatments.intro">Kies een behandeling om de prijzen te bekijken. Marli Nails verzorgt korte nagels en nagels met een medium lengte.</p>
-          <a class="tlink" href="#/prijslijst">Naar de volledige prijslijst</a>
-        </div>
+        <p data-c="home.treatments.intro">Kies een behandeling om de prijzen te bekijken. Marli Nails verzorgt korte nagels en nagels met een medium lengte.</p>
+        <a class="tlink" href="#/prijslijst">Naar de volledige prijslijst</a>
       </div>
       <ul class="cards" id="cards"></ul>
       <div class="treat-foot"><p id="treatFoot"></p><p>Twijfelt u over een behandeling? <a data-tel-href>Bel gerust<span class="sr"> naar Marli Nails</span></a>.</p></div>
     </div>
   </section>
 
-  <section class="quote" aria-label="In de woorden van Marjon">
-    <div class="wrap"><blockquote class="reveal"><p id="quote"></p><footer>Marjon van Rossum</footer></blockquote></div>
-  </section>
-
   <section class="sec portfolio" aria-labelledby="h-work">
     <div class="wrap">
-      <p class="section-label reveal"><span class="section-number" aria-hidden="true">03</span>Werk uit de salon</p>
       <div class="sec-head reveal">
-        <h2 id="h-work" data-c-rich="home.gallery.title">Kleine details.<br><em>Een eigen karakter.</em></h2>
+        <div>
+          <p class="section-label">Werk uit de salon</p>
+          <h2 id="h-work" data-c-rich="home.gallery.title">Kleine details.<br><em>Een eigen karakter.</em></h2>
+        </div>
         <div><p data-c="home.gallery.intro">Van ingetogen tot kleurrijk. Een selectie van echte nagels uit de salon, met aandacht gemaakt.</p><p class="gallery-hint">Klik of tik op een foto om hem groter te bekijken.</p></div>
       </div>
       <div class="gal" id="gal"></div>
@@ -148,11 +143,11 @@
   <section class="book" aria-labelledby="h-book">
     <div class="wrap book-grid">
       <div class="book-intro reveal">
-        <p class="section-label"><span class="section-number" aria-hidden="true">04</span>Afspraak maken</p>
+        <p class="section-label">Afspraak maken</p>
         <h2 id="h-book" data-c-rich="home.booking.title">Uw volgende<br><em>verwenmoment.</em></h2>
         <p data-c="home.booking.text">Marli Nails werkt uitsluitend op afspraak. Bel of mail gerust, dan zoeken we samen een moment dat u past.</p>
         <div class="book-ctas">
-          <a class="btn btn-pink" href="#/contact">Maak een afspraak<span class="btn-arrow" aria-hidden="true">→</span></a>
+          <a class="btn btn-light" href="#/contact">Maak een afspraak<span class="btn-arrow" aria-hidden="true">→</span></a>
           <a class="tlink" data-tel-href>Of bel direct<span class="sr"> naar Marli Nails</span></a>
         </div>
       </div>
@@ -293,6 +288,6 @@
 </dialog>
 
 <script src="/content.js" defer></script>
-<script src="/app.js?v=cms-20261015" defer></script>
+<script src="/app.js?v=marli-20261019" defer></script>
 </body>
 </html>

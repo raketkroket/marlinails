@@ -1,10 +1,10 @@
 /* Only inside the editor preview: make editable parts of the real website visible. */
 .mx-edit{cursor:pointer;outline:2px dashed transparent;outline-offset:4px;border-radius:6px;transition:outline-color .15s,background-color .15s}
-.mx-edit:hover,.mx-edit:focus-visible{outline-color:#ad2d67;background-color:rgba(249,228,236,.35)}
-.mx-edit.mx-img:hover,.mx-edit.mx-img:focus-visible{outline:3px solid #ad2d67;outline-offset:-3px;background-color:transparent}
-.mx-edit.mx-img::after{content:"Foto vervangen";position:absolute;left:12px;top:12px;z-index:5;padding:6px 12px;border-radius:999px;background:#ad2d67;color:#fff;font:600 14px/1.2 "DM Sans",sans-serif;opacity:0;transition:opacity .15s;pointer-events:none}
+.mx-edit:hover,.mx-edit:focus-visible{outline-color:#c8136a;background-color:rgba(249,228,236,.35)}
+.mx-edit.mx-img:hover,.mx-edit.mx-img:focus-visible{outline:3px solid #c8136a;outline-offset:-3px;background-color:transparent}
+.mx-edit.mx-img::after{content:"Foto vervangen";position:absolute;left:12px;top:12px;z-index:5;padding:6px 12px;border-radius:999px;background:#c8136a;color:#fff;font:600 14px/1.2 "Bricolage Grotesque","DM Sans",sans-serif;opacity:0;transition:opacity .15s;pointer-events:none}
 .mx-edit.mx-img:hover::after,.mx-edit.mx-img:focus-visible::after{opacity:1}
 .hero-backdrop.mx-img::after{top:auto;bottom:90px;left:auto;right:24px}
 .mx-flash{animation:mxFlash 1.6s ease-out 2}
-@keyframes mxFlash{0%,100%{outline-color:transparent}40%{outline:3px solid #ad2d67;outline-offset:4px}}
+@keyframes mxFlash{0%,100%{outline-color:transparent}40%{outline:3px solid #c8136a;outline-offset:4px}}
 /* The editor preview needs no extra layout changes: the site has no floating bars. */

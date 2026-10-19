@@ -50,9 +50,11 @@ keyboard, real-device and 200% browser zoom testing remains important.
 ## Structure and deployment
 
 - `public/index.html`: existing page layout and business metadata.
-- `public/site.css`: the whole design system in one file: ivory/stone palette,
-  charcoal type, muted rose accent, Instrument Serif + DM Sans (self-hosted WOFF2),
-  hairline layouts, responsive rules and reduced-motion-safe reveals.
+- `public/site.css`: the whole design system in one file: warm off-white and
+  charcoal with Marli pink from the logo, Bricolage Grotesque headings with an
+  Instrument Serif italic accent and DM Sans body text (self-hosted WOFF2), three
+  recurring details (nail-shaped frames and marks, tilted stickers, the treatment
+  index), responsive rules and reduced-motion-safe animation.
 - `public/content/*.json`: editable texts, photos and prices (edited via `/admin`).
 - `public/app.js`: fixed business details (phone, address, hours), rendering,
   navigation, dated prices and the email-draft form.
@@ -249,7 +251,7 @@ responsive WebP copies, strips image metadata and enforces a 400 KB per-file bud
 Run it again after adding a photo; assign it to the appropriate content entry.
 The build excludes the full-sized supplied JPEG originals from deployment.
 
-DM Sans and Instrument Serif are locally hosted (WOFF2); their SIL Open Font License
+Bricolage Grotesque, DM Sans and Instrument Serif Italic are locally hosted (WOFF2); their SIL Open Font License
 notices are included alongside the font files. Local hosting avoids sending
 visitors' IP addresses to font or image CDNs. Google Maps is an outbound directions
 link, not an embedded tracking map.

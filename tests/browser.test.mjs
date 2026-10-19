@@ -18,24 +18,53 @@ after(async () => {
 });
 
 const pages = ['home', 'prijslijst', 'producten', 'over', 'contact'];
-test('studio design system: charcoal squared buttons, no glass, quiet motion', async () => {
+test('Marli design system: pink actions, charcoal type, one bold pink block', async () => {
   const page = await newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
   await navigate(page, 'home');
   const style = await page.locator('.hero .btn-pink').evaluate(el => ({
     background: getComputedStyle(el).backgroundColor,
     color: getComputedStyle(el).color,
-    radius: getComputedStyle(el).borderRadius,
     transition: getComputedStyle(el).transitionDuration
   }));
-  assert.deepEqual(style, { background: 'rgb(36, 32, 30)', color: 'rgb(246, 242, 236)', radius: '2px', transition: '0s' });
-  assert.equal(await page.locator('body').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(246, 242, 236)');
-  assert.equal(await page.locator('.book').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(239, 226, 221)');
+  assert.deepEqual(style, { background: 'rgb(200, 19, 106)', color: 'rgb(255, 255, 255)', transition: '0s' });
+  assert.equal(await page.locator('body').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(247, 243, 238)');
+  assert.equal(await page.locator('.book').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(200, 19, 106)');
   assert.equal(await page.locator('.hdr').evaluate(el => getComputedStyle(el).backdropFilter), 'none');
-  assert.equal(await page.locator('.actionbar').count(), 0, 'no floating booking bar');
-  // One display face for the brand and headings, one sans for reading.
-  assert.match(await page.locator('.hero-brand').evaluate(el => getComputedStyle(el).fontFamily), /Instrument Serif/);
+  for (const removed of ['.actionbar', '.hero-brand', '.quote', '.section-number']) assert.equal(await page.locator(removed).count(), 0, removed);
+  // A grotesque for headings, a serif italic for the accent words, a sans for reading.
+  assert.match(await page.locator('#h-home').evaluate(el => getComputedStyle(el).fontFamily), /Bricolage Grotesque/);
+  assert.match(await page.locator('#h-home em').evaluate(el => getComputedStyle(el).fontFamily), /Instrument Serif/);
   assert.match(await page.locator('.hero-text').evaluate(el => getComputedStyle(el).fontFamily), /DM Sans/);
+  // The prelude is an editable sticker on the hero photograph.
+  assert.equal(await page.locator('.hero-figure .hero-prelude.sticker[data-c="home.hero.prelude"]').isVisible(), true);
   await page.close();
+});
+
+test('no clipped text and no sideways scrolling on phones and tablets', async () => {
+  for (const width of [375, 390, 768]) {
+    const page = await newPage({ viewport: { width, height: 800 }, reducedMotion: 'reduce' });
+    for (const name of pages) {
+      await navigate(page, name);
+      const problems = await page.evaluate(() => {
+        const out = [];
+        if (document.documentElement.scrollWidth > innerWidth) out.push(`page is ${document.documentElement.scrollWidth}px wide`);
+        const view = document.querySelector('.view.on');
+        for (const el of [document.querySelector('.hdr'), view, document.querySelector('.ftr')].flatMap(root => [...root.querySelectorAll('*')])) {
+          if (el.closest('.sr, .ph, .pidx, dialog, .mmenu')) continue;
+          const box = el.getBoundingClientRect();
+          if (box.width <= 1 || box.height <= 1) continue;
+          // Text that sticks out of the screen, or is cut off by its own box.
+          if (box.right > innerWidth + 1 || box.left < -1) out.push(`${el.tagName}.${el.className} sticks out (${Math.round(box.left)}–${Math.round(box.right)})`);
+          const cs = getComputedStyle(el);
+          const hidesOverflow = cs.overflowX === 'hidden' || cs.overflowX === 'clip' || cs.overflowY === 'hidden' || cs.overflowY === 'clip';
+          if (hidesOverflow && el.textContent.trim() && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)) out.push(`${el.tagName}.${el.className} clips its text`);
+        }
+        return out;
+      });
+      assert.deepEqual(problems, [], `${name} at ${width}px`);
+    }
+    await page.close();
+  }
 });
 
 test('mobile header shows only the logo and a menu button; booking lives in the menu', async () => {
@@ -191,7 +220,7 @@ test('original images and fonts load locally, with no third-party requests', asy
     await document.fonts.ready;
     return [...document.fonts].filter(face => face.status === 'loaded').map(face => face.family.replace(/["']/g, ''));
   });
-  for (const family of ['Instrument Serif', 'DM Sans']) assert.ok(loaded.includes(family), family);
+  for (const family of ['Bricolage Grotesque', 'Instrument Serif', 'DM Sans']) assert.ok(loaded.includes(family), family);
   assert.deepEqual(external, []);
   await page.close();
 });
@@ -477,7 +506,7 @@ test('content edited via /admin (content JSON) drives texts, photos and prices o
   await page.route('**/content.js', route => route.fulfill({ contentType: 'text/javascript', body: `window.MARLI_CONTENT=${JSON.stringify(data)};` }));
   await navigate(page, 'home');
   assert.equal(await page.locator('#h-home').innerHTML(), 'Nieuwe titel<br><em>met accent</em>');
-  assert.equal(await page.locator('.gal figcaption span').nth(1).textContent(), 'Nieuw bijschrift <b>');
+  assert.equal(await page.locator('.gal figcaption span').first().textContent(), 'Nieuw bijschrift <b>');
   assert.equal(await page.locator('.card .price').nth(2).innerText(), 'Vanaf € 51');
   await navigate(page, 'prijslijst');
   assert.equal((await page.locator('#natuurlijk tbody td').first().innerText()).replace(/\s/g, ' '), '€ 51,00');

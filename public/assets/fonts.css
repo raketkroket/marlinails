@@ -1,11 +1,12 @@
 /* Self-hosted Google Fonts (SIL Open Font License, see *-OFL.txt), Latin subset, WOFF2.
-   Instrument Serif: display and editorial italic. DM Sans: everything you read. */
+   Bricolage Grotesque: headings and labels. Instrument Serif Italic: a few expressive words.
+   DM Sans: everything you read. */
 @font-face {
-  font-family: 'Instrument Serif';
+  font-family: 'Bricolage Grotesque';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 300 800;
   font-display: swap;
-  src: url(/assets/instrumentserif.woff2) format('woff2');
+  src: url(/assets/bricolage-var.woff2) format('woff2');
 }
 @font-face {
   font-family: 'Instrument Serif';
