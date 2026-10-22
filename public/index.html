@@ -26,12 +26,12 @@
  "description":"Nagelsalon aan huis in Almere. Persoonlijke nagelverzorging door Marjon van Rossum, uitsluitend op afspraak. Afwijkende tijden, bijvoorbeeld in de avond, zijn in overleg mogelijk.",
  "telephone":"+31622889353","email":"info@marlinails.nl","priceRange":"€€","founder":{"@type":"Person","name":"Marjon van Rossum"},
  "address":{"@type":"PostalAddress","streetAddress":"Sonatestraat 6","postalCode":"1312 EH","addressLocality":"Almere","addressCountry":"NL"},
- "areaServed":{"@type":"City","name":"Almere"},
+ "areaServed":{"@type":"City","name":"Almere"},"sameAs":["https://www.instagram.com/marlinailsalmere/"],
  "openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Wednesday","Thursday","Friday","Saturday"],"opens":"10:00","closes":"18:00"}]}
 </script>
 <link rel="preload" as="image" href="/assets/20260313_163813-1440.webp" imagesrcset="/assets/20260313_163813-640.webp 640w, /assets/20260313_163813-1440.webp 1440w, /assets/20260313_163813-2400.webp 2400w" imagesizes="100vw" fetchpriority="high">
 <link rel="stylesheet" href="/assets/fonts.css">
-<link rel="stylesheet" href="/site.css?v=marli-20261019-hero4">
+<link rel="stylesheet" href="/site.css?v=marli-20261022-insta">
 </head>
 <body>
 
@@ -54,13 +54,14 @@
   <div class="mm-info">
     <a class="btn btn-pink" href="#/contact">Maak een afspraak<span class="btn-arrow" aria-hidden="true">→</span></a>
     <p>Bel <a data-tel></a></p>
+    <p>Instagram <a data-insta target="_blank" rel="noopener noreferrer"></a></p>
     <p>Mail <a data-mail></a></p>
     <p>Woensdag t/m zaterdag, 10:00–18:00. Uitsluitend op afspraak.</p>
     <p class="hours-note" data-hours-note></p>
   </div>
 </div>
 
-<noscript><div class="wrap no-js"><h1>Welkom bij Marli Nails</h1><p>Persoonlijke nagelverzorging bij Marjon van Rossum. Sonatestraat 6, 1312 EH Almere. Woensdag t/m zaterdag, 10:00–18:00, uitsluitend op afspraak. Afwijkende tijden zijn in overleg mogelijk, bijvoorbeeld in de avond.</p><p><a href="tel:+31622889353">Bel 06 22889353</a> of <a href="mailto:info@marlinails.nl">mail info@marlinails.nl</a>.</p><p>Schakel JavaScript in om de behandelingen, de prijslijst en de producten te bekijken, of bel gerust voor informatie.</p></div></noscript>
+<noscript><div class="wrap no-js"><h1>Welkom bij Marli Nails</h1><p>Persoonlijke nagelverzorging bij Marjon van Rossum. Sonatestraat 6, 1312 EH Almere. Woensdag t/m zaterdag, 10:00–18:00, uitsluitend op afspraak. Afwijkende tijden zijn in overleg mogelijk, bijvoorbeeld in de avond.</p><p><a href="tel:+31622889353">Bel 06 22889353</a> of <a href="mailto:info@marlinails.nl">mail info@marlinails.nl</a>, of stuur een bericht via Instagram: <a href="https://www.instagram.com/marlinailsalmere/" target="_blank" rel="noopener noreferrer">@marlinailsalmere</a>.</p><p>Schakel JavaScript in om de behandelingen, de prijslijst en de producten te bekijken, of bel gerust voor informatie.</p></div></noscript>
 <main id="main" tabindex="-1">
 
 <!-- =============================== HOME =============================== -->
@@ -84,7 +85,7 @@
 
   <section class="strip" aria-label="Praktische informatie">
     <div class="wrap"><ul>
-      <li><span class="strip-label">Afspraak</span><span><strong>Uitsluitend op afspraak</strong>Bel <a data-tel></a> of stuur een e-mail.</span></li>
+      <li><span class="strip-label">Afspraak</span><span><strong>Uitsluitend op afspraak</strong>Bel <a data-tel></a>, mail, of stuur een bericht via <a data-insta-href target="_blank" rel="noopener noreferrer">Instagram<span class="sr"> (opent in een nieuw venster)</span></a>.</span></li>
       <li><span class="strip-label">Open</span><span><strong>Woensdag t/m zaterdag, 10:00–18:00</strong>Afwijkende tijden, bijvoorbeeld in de avond, in overleg.</span></li>
       <li><span class="strip-label">Adres</span><span><strong>Sonatestraat 6, Almere</strong><a data-route target="_blank" rel="noopener">Route plannen<span class="sr"> (opent Google Maps)</span></a></span></li>
     </ul></div>
@@ -154,6 +155,7 @@
       <div class="book-cols reveal">
         <div><h3>Bellen</h3><a class="big" data-tel></a></div>
         <div><h3>E-mailen</h3><a class="big" data-mail></a></div>
+        <div><h3>Bericht via Instagram</h3><a class="big" data-insta target="_blank" rel="noopener noreferrer"></a></div>
         <div><h3>Openingstijden</h3><dl data-hours></dl><p class="hours-note" data-hours-note></p></div>
       </div>
     </div>
@@ -229,6 +231,7 @@
       <ul class="direct">
         <li><a data-tel-href><small>Bellen</small><b data-tel-text></b></a></li>
         <li><a data-mail-href><small>E-mailen</small><b data-mail-text></b></a></li>
+        <li><a class="direct-insta" data-insta-href target="_blank" rel="noopener noreferrer"><small>Bericht via Instagram</small><b data-insta-text></b><span class="sr"> (opent in een nieuw venster)</span></a></li>
       </ul>
       <form class="cform" id="cform" novalidate aria-describedby="form-note">
         <h2>Stel een bericht op</h2>
@@ -268,6 +271,7 @@
             <span id="faddr"></span>
             <a data-tel-href><span data-tel-text></span></a>
             <a data-mail-href><span data-mail-text></span></a>
+            <a data-insta-href target="_blank" rel="noopener noreferrer">Instagram: <span data-insta-text></span><span class="sr"> (opent in een nieuw venster)</span></a>
           </address>
         </div>
         <div>
@@ -288,6 +292,6 @@
 </dialog>
 
 <script src="/content.js" defer></script>
-<script src="/app.js?v=marli-20261019" defer></script>
+<script src="/app.js?v=marli-20261022" defer></script>
 </body>
 </html>

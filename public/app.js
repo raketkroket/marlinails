@@ -9,7 +9,7 @@
 /* Vaste gegevens: staan ook in de structured data en metadata in index.html,
    dus wijzigingen hier ook daar doorvoeren (niet via /admin). */
 const SITE={
-  business:{name:"Marli Nails",owner:"Marjon van Rossum",phone:"06 22889353",phoneIntl:"+31622889353",email:"info@marlinails.nl",street:"Sonatestraat 6",postcode:"1312 EH",city:"Almere"},
+  business:{name:"Marli Nails",owner:"Marjon van Rossum",phone:"06 22889353",phoneIntl:"+31622889353",email:"info@marlinails.nl",instagram:"marlinailsalmere",street:"Sonatestraat 6",postcode:"1312 EH",city:"Almere"},
   nav:[["Home","#/"],["Prijslijst","#/prijslijst"],["Producten Seduction","#/producten"],["Over Marli Nails","#/over"],["Contact","#/contact"]],
   /* Vaste openingstijden. Avondafspraken zijn mogelijk in overleg, maar zijn géén vaste openingstijd. */
   hours:[["Woensdag","10:00–18:00"],["Donderdag","10:00–18:00"],["Vrijdag","10:00–18:00"],["Zaterdag","10:00–18:00"]],
@@ -120,6 +120,11 @@ $$('[data-img]').forEach(el=>fill(el,C.images[el.dataset.img],{ratio:!el.classLi
 
 $$('[data-tel]').forEach(a=>{a.href=tel;a.textContent=B.phone});
 $$('[data-mail]').forEach(a=>{a.href=mail;a.textContent=B.email});
+/* Instagram: berichten sturen kan ook daar. */
+const insta=`https://www.instagram.com/${B.instagram}/`;
+$$('[data-insta]').forEach(a=>{a.href=insta;a.innerHTML=`@${esc(B.instagram)}<span class="sr"> op Instagram (opent in een nieuw venster)</span>`});
+$$('[data-insta-href]').forEach(a=>a.href=insta);
+$$('[data-insta-text]').forEach(el=>el.textContent=`@${B.instagram}`);
 $$('[data-tel-href]').forEach(a=>a.href=tel);$$('[data-mail-href]').forEach(a=>a.href=mail);
 $$('[data-tel-text]').forEach(a=>a.textContent=B.phone);$$('[data-mail-text]').forEach(a=>a.textContent=B.email);
 $$('[data-route]').forEach(a=>a.href=route);
