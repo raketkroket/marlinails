@@ -398,3 +398,15 @@ h1 em,h2 em,.login-quote em{font-family:var(--script);font-weight:400;font-style
 .tile,.page-card,.photo-card,.price-group,.card,.status-card,.schedule-note,.frame{border-radius:12px}
 .page-card .num{font:italic 400 1.6rem var(--script);color:var(--pink)}
 .price-group>h2{border-radius:12px 12px 0 0}
+
+/* Phones: the photo page is a compact list (small thumbnail, name, button), so all
+   photos are a few swipes away instead of one tall card per screen. */
+@media (max-width:700px){
+  .photos{grid-template-columns:minmax(0,1fr);gap:10px}
+  .photo-card{flex-direction:row;align-items:center;gap:14px;padding:10px}
+  .photo-card .thumb{flex:none;width:84px;aspect-ratio:4/5;border-radius:8px;overflow:hidden}
+  .photo-card .meta{flex:1;min-width:0;gap:8px;padding:0}
+  .photo-card h2{font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+  .photo-card .btn{width:100%;min-height:46px;padding:8px 12px;font-size:15px}
+  .section-title{margin-top:26px}
+}
